@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "WeatherForcast"
 include(":app")
+include(":core:network")
+include(":core:location")
