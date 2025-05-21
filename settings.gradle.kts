@@ -23,3 +23,5 @@ rootProject.name = "WeatherForcast"
 include(":app")
 include(":core:network")
 include(":core:location")
+include("feature:forecaset")
+include(":feature:detail")
