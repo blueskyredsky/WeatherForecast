@@ -17,13 +17,20 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
-
-        buildConfigField("String", "BASE_URL", "\"https://api.weatherapi.com/v1/\"")
-
-        // Read API key from local.properties
-        val properties = Properties()
-        properties.load(project.rootProject.file("local.properties").inputStream())
-        buildConfigField("String", "API_KEY", "\"${properties.getProperty("API_KEY")}\"")
+    }
+    buildTypes {
+        getByName("debug") {
+            val properties = Properties()
+            properties.load(project.rootProject.file("local.properties").inputStream())
+            buildConfigField("String", "API_KEY", "\"${properties.getProperty("API_KEY")}\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.debug.example.com/\"")
+        }
+        getByName("release") {
+            val properties = Properties()
+            properties.load(project.rootProject.file("local.properties").inputStream())
+            buildConfigField("String", "API_KEY", "\"${properties.getProperty("API_KEY")}\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.release.example.com/\"")
+        }
     }
 
     buildTypes {

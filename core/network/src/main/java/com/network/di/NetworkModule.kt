@@ -1,6 +1,7 @@
 package com.network.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.network.BuildConfig
 import com.network.interceptor.ApiKeyInterceptor
 import dagger.Module
 import dagger.Provides
@@ -52,7 +53,7 @@ object NetworkModule {
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         val contentType = "application/json".toMediaType()
         return Retrofit.Builder()
-            .baseUrl("https://api.github.com/")
+            .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(Json.asConverterFactory(contentType))
             .build()
