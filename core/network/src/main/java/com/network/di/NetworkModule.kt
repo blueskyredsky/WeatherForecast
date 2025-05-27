@@ -1,6 +1,7 @@
 package com.network.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.network.ApiService
 import com.network.BuildConfig
 import com.network.interceptor.ApiKeyInterceptor
 import dagger.Module
@@ -57,5 +58,11 @@ object NetworkModule {
             .client(okHttpClient)
             .addConverterFactory(Json.asConverterFactory(contentType))
             .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideApiService(retrofit: Retrofit): ApiService {
+        return retrofit.create(ApiService::class.java)
     }
 }

@@ -1,8 +1,10 @@
 package com.network.models.reponse
 
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-data class Location(
+@Serializable
+data class LocationDTO(
     @SerialName("country") val country: String?,
     @SerialName("lat") val lat: Double?,
     @SerialName("localtime") val localtime: String?,

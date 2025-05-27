@@ -1,10 +1,12 @@
 package com.network.models.reponse
 
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-data class Current(
+@Serializable
+data class CurrentDTO(
     @SerialName("cloud") val cloud: Int?,
-    @SerialName("condition") val condition: Condition?,
+    @SerialName("condition") val conditionDTO: ConditionDTO?,
     @SerialName("dewpoint_c") val dewPointC: Double?,
     @SerialName("dewpoint_f")  val dewPointF: Double?,
     @SerialName("feelslike_c") val feelsLikeC: Double?,
