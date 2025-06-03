@@ -44,7 +44,8 @@ android {
 dependencies {
 
     // projects
-    implementation(project(":core:network"))
+    implementation(project(":feature:forecaset"))
+    implementation(project(":feature:detail"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

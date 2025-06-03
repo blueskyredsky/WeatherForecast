@@ -23,12 +23,9 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
-@Singleton
 class DefaultLocationProvider @Inject constructor(
     @ApplicationContext private val context: Context
 ) : LocationProvider {
-
 
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
@@ -43,10 +40,10 @@ class DefaultLocationProvider @Inject constructor(
             return@callbackFlow
         }
 
-        val locationRequest = LocationRequest.Builder(10_000L) // Desired interval for location updates (10 seconds)
-            .setPriority(Priority.PRIORITY_HIGH_ACCURACY) // Request high accuracy location
-            .setMinUpdateIntervalMillis(5000L) // Fastest interval for updates (5 seconds)
-            .setMaxUpdateDelayMillis(15000L) // Maximum delay before an update is delivered (15 seconds)
+        val locationRequest = LocationRequest.Builder(10_000L)
+            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+            .setMinUpdateIntervalMillis(5_000L)
+            .setMaxUpdateDelayMillis(15_000L)
             .build()
 
         val locationCallback = object : LocationCallback() {
@@ -76,20 +73,16 @@ class DefaultLocationProvider @Inject constructor(
         }
 
         try {
-            val location = fusedLocationClient.lastLocation.await() // Suspend function for async result
+            val location = fusedLocationClient.lastLocation.await()
             trySend(location)
         } catch (e: Exception) {
-            // Handle exceptions, e.g., location services not available
-            trySend(null) // Emit null if an error occurs
+            trySend(null)
             close(e)
         }
         awaitClose { /* No specific cleanup needed for a one-shot operation */ }
     }
 
     override fun isLocationEnabled(): Flow<Boolean> {
-        // This is a simplified check. For more robust real-time updates, you might need a BroadcastReceiver
-        // to listen for LOCATION_MODE_CHANGED intents, but that's more complex.
-        // For basic checks, this is sufficient when observed.
         return flowOf(
             locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                     locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
