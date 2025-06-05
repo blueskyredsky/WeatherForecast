@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.weatherforcast.navigation.AppNavHost
 import com.weatherforcast.ui.theme.WeatherForcastTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,10 +23,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             WeatherForcastTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    AppNavHost()
                 }
             }
         }
