@@ -20,6 +20,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "WeatherForcast"
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include(":app")
 include(":core:network")
 include(":core:location")

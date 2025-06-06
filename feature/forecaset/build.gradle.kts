@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.dagger.hilt.android)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 android {
@@ -39,8 +41,8 @@ android {
 dependencies {
 
     // projects
-    implementation(project(":core:network"))
-    implementation(project(":core:location"))
+    implementation(projects.core.network)
+    implementation(projects.core.location)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -60,6 +62,10 @@ dependencies {
     // AndroidX Lifecycle for ViewModel support
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // di
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
