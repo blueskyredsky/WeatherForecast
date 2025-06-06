@@ -25,7 +25,7 @@ fun NavGraphBuilder.addDetailGraph(
 ) {
     navigation(
         startDestination = DetailRoutes.ItemDetail.route,
-        route = DETAIL_GRAPH_ROUTE // The root route for this feature's graph
+        route = DETAIL_GRAPH_ROUTE
     ) {
         composable(
             route = DetailRoutes.ItemDetail.route,
@@ -43,6 +43,5 @@ fun NavGraphBuilder.addDetailGraph(
                 }
             )
         }
-        // Add other composable screens for the detail feature here if any
     }
 }

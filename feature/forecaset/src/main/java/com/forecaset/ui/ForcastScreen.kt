@@ -13,8 +13,6 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ForecastScreen(
-    // This callback signals that Forecast needs to show a detail, but it doesn't know *how*
-    // or where that detail screen actually lives.
     onNavigateToDetail: (locationId: String) -> Unit
 ) {
     Column(
@@ -24,11 +22,10 @@ fun ForecastScreen(
     ) {
         Text(text = "Forecast Home Screen")
         Button(
-            onClick = { onNavigateToDetail("London") }, // Request to show detail for "London"
+            onClick = { onNavigateToDetail("London") },
             modifier = Modifier.padding(top = 16.dp)
         ) {
             Text("View London Weather Detail")
         }
-        // Add more UI elements as needed
     }
 }

@@ -28,7 +28,7 @@ fun NavGraphBuilder.addForecastGraph(
 ) {
     navigation(
         startDestination = ForecastRoutes.ForecastHome.route,
-        route = FORECAST_GRAPH_ROUTE // The root route for this feature's graph
+        route = FORECAST_GRAPH_ROUTE
     ) {
         composable(ForecastRoutes.ForecastHome.route) { backStackEntry ->
             ForecastScreen(
@@ -39,6 +39,5 @@ fun NavGraphBuilder.addForecastGraph(
                 }
             )
         }
-        // No other composable screens here, as ForecastDetail is in :detail module.
     }
 }
