@@ -13,20 +13,34 @@ class DefaultForecastRepository @Inject constructor(
     private val apiService: ApiService,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : ForecastRepository {
-    override suspend fun fetchCurrentWeather(location: String): Result<CurrentWeather> = withContext(ioDispatcher) {
-        try {
-            val response = apiService.fetchCurrentWeather(location)
-            if (response.isSuccessful) {
-                // If body is null, or mapping fails, toCurrentWeatherResult() will return Result.failure
-                // We map that failure to a more specific repository error type
-                response.body()?.toCurrentWeatherResult()?.getOrElse { exception ->
-                    return Result.failure(RepositoryError.MappingError(exception))
-                } ?: Result.failure(RepositoryError.NetworkError(response.code(), "Response body is null"))
-            } else {
-                Result.failure(RepositoryError.NetworkError(response.code(), response.errorBody()?.string()))
+
+    override suspend fun fetchCurrentWeather(location: String): Result<CurrentWeather> =
+        withContext(ioDispatcher) {
+            try {
+                apiService.fetchCurrentWeather(location).let { response ->
+                    if (response.isSuccessful) {
+                        response.body()?.let { body ->
+                            body.toCurrentWeatherResult().fold(
+                                onSuccess = { currentWeather -> Result.success(currentWeather) },
+                                onFailure = { throwable -> Result.failure(RepositoryError.MappingError(throwable)) }
+                            )
+                        } ?: Result.failure(
+                            RepositoryError.NetworkError(
+                                response.code(),
+                                "Response body is null"
+                            )
+                        )
+                    } else {
+                        Result.failure(
+                            RepositoryError.NetworkError(
+                                response.code(),
+                                response.errorBody()?.string()
+                            )
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                Result.failure(RepositoryError.UnknownError(e))
             }
-        } catch (e: Exception) { // Catch any other unexpected exceptions (e.g., network timeout)
-            Result.failure(RepositoryError.UnknownError(e))
         }
-    }
 }
