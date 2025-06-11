@@ -59,6 +59,7 @@ dependencies {
 
     // AndroidX Navigation for Compose
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // AndroidX Lifecycle for ViewModel support
     implementation(libs.lifecycle.runtime.ktx)
