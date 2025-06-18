@@ -44,6 +44,7 @@ dependencies {
     implementation(projects.core.network)
     implementation(projects.core.location)
     implementation(projects.core.threading)
+    implementation(projects.core.common)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

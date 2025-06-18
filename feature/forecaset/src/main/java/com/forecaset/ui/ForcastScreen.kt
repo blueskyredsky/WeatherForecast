@@ -35,7 +35,7 @@ fun ForecastScreen(
             permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         ) {
             // Permissions granted, try to load weather
-            viewModel.loadCurrentWeather()
+            //viewModel.loadCurrentWeather()
         } else {
             // Permissions denied, show a message or direct to settings
             // You might want to show a SnackBar or AlertDialog here

@@ -61,7 +61,7 @@ dependencies {
     implementation(libs.material)
 
     // network
-    implementation(libs.retrofit)
+    api(libs.retrofit)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.retrofit.kotlinx.serialization.converter)

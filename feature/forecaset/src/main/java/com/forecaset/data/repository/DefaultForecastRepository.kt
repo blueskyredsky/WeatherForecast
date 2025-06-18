@@ -20,10 +20,11 @@ class DefaultForecastRepository @Inject constructor(
                 apiService.fetchCurrentWeather(location).let { response ->
                     if (response.isSuccessful) {
                         response.body()?.let { body ->
-                            body.toCurrentWeatherResult().fold(
+                            val conversionResult: Result<CurrentWeather> = body.toCurrentWeatherResult().fold(
                                 onSuccess = { currentWeather -> Result.success(currentWeather) },
                                 onFailure = { throwable -> Result.failure(RepositoryError.MappingError(throwable)) }
                             )
+                            conversionResult
                         } ?: Result.failure(
                             RepositoryError.NetworkError(
                                 response.code(),

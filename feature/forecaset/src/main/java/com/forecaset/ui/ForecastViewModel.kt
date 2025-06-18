@@ -3,12 +3,12 @@ package com.forecaset.ui
 import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.common.model.Result
 import com.forecaset.data.model.CurrentWeather
 import com.forecaset.data.repository.ForecastRepository
 import com.forecaset.data.repository.LocationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -23,17 +23,16 @@ class ForecastViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _currentWeather = MutableStateFlow<Result<CurrentWeather?>?>(null)
-    val currentWeather: StateFlow<Result<CurrentWeather?>?> = _currentWeather.asStateFlow()
+    val currentWeather = _currentWeather.asStateFlow()
 
     private val _locationPermissionGranted = MutableStateFlow(false)
-    val locationPermissionGranted: StateFlow<Boolean> = _locationPermissionGranted.asStateFlow()
+    val locationPermissionGranted = _locationPermissionGranted.asStateFlow()
 
     private val _locationEnabled = MutableStateFlow(false)
-    val locationEnabled: StateFlow<Boolean> = _locationEnabled.asStateFlow()
+    val locationEnabled = _locationEnabled.asStateFlow()
 
-    // State to communicate a need to request permissions
     private val _requestLocationPermissions = MutableStateFlow(false)
-    val requestLocationPermissions: StateFlow<Boolean> = _requestLocationPermissions.asStateFlow()
+    val requestLocationPermissions = _requestLocationPermissions.asStateFlow()
 
     fun checkLocationPermission() {
         _locationPermissionGranted.value = locationRepository.hasLocationPermissions()
@@ -47,12 +46,8 @@ class ForecastViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    /**
-     * Call this when the view is ready to fetch weather.
-     * It will handle permission checks and location acquisition.
-     */
+
     fun fetchWeatherOnLocation() {
-        // Check permissions via the repository
         if (!locationRepository.hasLocationPermissions()) {
             _requestLocationPermissions.value = true
             return
@@ -64,7 +59,7 @@ class ForecastViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _currentWeather.value = Result.Loading // Show loading state
+            _currentWeather.value = Result.Loading
 
             // Try to get location updates first, if not available, fall back to last known location.
             locationRepository.getLocationUpdates()
@@ -84,7 +79,7 @@ class ForecastViewModel @Inject constructor(
                             if (lastLocation != null) {
                                 fetchWeather(lastLocation)
                             } else {
-                                _currentWeather.value = Result.Error(Exception("Could not get current or last known location."))
+                                //_currentWeather.value = Result.Error(Exception("Could not get current or last known location."))
                             }
                         }
                         .catch { eLast ->
@@ -112,39 +107,23 @@ class ForecastViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Call this from your Activity/Fragment once permissions are granted.
-     */
     fun onLocationPermissionsGranted() {
         _locationPermissionGranted.value = true
         _requestLocationPermissions.value = false // Reset request flag
         fetchWeatherOnLocation() // Retry fetching weather now that permissions are granted
     }
 
-    /**
-     * Call this if permissions are denied.
-     */
     fun onLocationPermissionsDenied() {
         _locationPermissionGranted.value = false
         _requestLocationPermissions.value = false // Reset request flag
         _currentWeather.value = Result.Error(Exception("Location permissions denied. Cannot fetch weather."))
     }
 
-    /**
-     * Acknowledge that the UI has handled the permission request.
-     */
     fun permissionRequestHandled() {
         _requestLocationPermissions.value = false
     }
 
-    // You can keep these for direct observation if needed, but fetchWeatherOnLocation orchestrates them.
     fun getLocationUpdates() = locationRepository.getLocationUpdates()
     fun getLastKnownLocation() = locationRepository.getLastKnownLocation()
     fun isLocationEnabled() = locationRepository.isLocationEnabled()
-}
-
-sealed class Result<out T> {
-    data class Success<out T>(val data: T) : Result<T>()
-    data class Error(val exception: Throwable) : Result<Nothing>()
-    object Loading : Result<Nothing>()
 }
