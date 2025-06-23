@@ -3,8 +3,8 @@ package com.forecaset.data.model
 import com.network.models.reponse.CurrentWeatherDTO
 
 data class CurrentWeather(
-    private val current: Current?,
-    private val location: Location?
+    val current: Current?,
+    val location: Location?
 )
 
 fun CurrentWeatherDTO.toCurrentWeatherResult(): Result<CurrentWeather> {

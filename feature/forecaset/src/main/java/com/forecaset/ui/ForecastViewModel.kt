@@ -65,8 +65,6 @@ class ForecastViewModel @Inject constructor(
             locationRepository.getLocationUpdates()
                 .onEach { location ->
                     fetchWeather(location)
-                    // If you only need one location for the weather API, you might want to stop further updates
-                    // by cancelling the flow collection or using .first() if appropriate.
                     // For continuous weather updates based on location, remove the return statement.
                     return@onEach
                 }
@@ -79,15 +77,15 @@ class ForecastViewModel @Inject constructor(
                             if (lastLocation != null) {
                                 fetchWeather(lastLocation)
                             } else {
-                                //_currentWeather.value = Result.Error(Exception("Could not get current or last known location."))
+                                _currentWeather.value = Result.Error(Exception("Could not get current or last known location."))
                             }
                         }
                         .catch { eLast ->
                             _currentWeather.value = Result.Error(eLast)
                         }
-                        .collect{} // Collect to trigger the flow
+                        .collect{}
                 }
-                .collect{} // Collect to trigger the flow
+                .collect{}
         }
     }
 
@@ -110,7 +108,7 @@ class ForecastViewModel @Inject constructor(
     fun onLocationPermissionsGranted() {
         _locationPermissionGranted.value = true
         _requestLocationPermissions.value = false // Reset request flag
-        fetchWeatherOnLocation() // Retry fetching weather now that permissions are granted
+        fetchWeatherOnLocation()
     }
 
     fun onLocationPermissionsDenied() {
@@ -122,8 +120,4 @@ class ForecastViewModel @Inject constructor(
     fun permissionRequestHandled() {
         _requestLocationPermissions.value = false
     }
-
-    fun getLocationUpdates() = locationRepository.getLocationUpdates()
-    fun getLastKnownLocation() = locationRepository.getLastKnownLocation()
-    fun isLocationEnabled() = locationRepository.isLocationEnabled()
 }
