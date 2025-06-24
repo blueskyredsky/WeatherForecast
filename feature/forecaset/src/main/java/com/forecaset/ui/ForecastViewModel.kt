@@ -3,6 +3,7 @@ package com.forecaset.ui
 import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.common.model.ErrorType
 import com.common.model.Result
 import com.forecaset.data.model.CurrentWeather
 import com.forecaset.data.repository.ForecastRepository
@@ -50,11 +51,13 @@ class ForecastViewModel @Inject constructor(
     fun fetchWeatherOnLocation() {
         if (!locationRepository.hasLocationPermissions()) {
             _requestLocationPermissions.value = true
+            // Now, instead of returning, set a specific error type
+            _currentWeather.value = Result.Error(Exception("Location permissions denied."), ErrorType.LOCATION_PERMISSIONS_DENIED)
             return
         }
 
         if (!_locationEnabled.value) {
-            _currentWeather.value = Result.Error(Exception("Location services are disabled. Please enable them."))
+            _currentWeather.value = Result.Error(Exception("Location services are disabled."), ErrorType.LOCATION_SERVICES_DISABLED)
             return
         }
 
@@ -70,18 +73,21 @@ class ForecastViewModel @Inject constructor(
                 }
                 .catch { e ->
                     // Handle cases where getLocationUpdates might fail (e.g., permissions revoked mid-update)
-                    _currentWeather.value = Result.Error(e)
+                    _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
                     // Fallback to last known location if updates fail
                     locationRepository.getLastKnownLocation()
                         .onEach { lastLocation ->
                             if (lastLocation != null) {
                                 fetchWeather(lastLocation)
                             } else {
-                                _currentWeather.value = Result.Error(Exception("Could not get current or last known location."))
+                                _currentWeather.value = Result.Error(
+                                    Exception("Could not get current or last known location."),
+                                    ErrorType.UNKNOWN
+                                )
                             }
                         }
                         .catch { eLast ->
-                            _currentWeather.value = Result.Error(eLast)
+                            _currentWeather.value = Result.Error(eLast, ErrorType.UNKNOWN)
                         }
                         .collect{}
                 }
