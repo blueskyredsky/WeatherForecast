@@ -17,4 +17,5 @@
     <string name="request_permission_again">Request Permission Again</string>
     <string name="fetch_weather">Fetch Weather</string>
     <string name="retry">Retry</string>
+    <string name="weather_condition_icon">Weather condition icon</string>
 </resources>

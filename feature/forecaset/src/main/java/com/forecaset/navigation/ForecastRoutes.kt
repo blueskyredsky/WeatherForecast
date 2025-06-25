@@ -6,5 +6,5 @@ sealed class ForecastRoutes(val route: String) {
 }
 
 sealed interface ForecastNavCallback {
-    data class NavigateToDetail(val locationId: String) : ForecastNavCallback
+    data class NavigateToDetail(val locationName: String) : ForecastNavCallback
 }

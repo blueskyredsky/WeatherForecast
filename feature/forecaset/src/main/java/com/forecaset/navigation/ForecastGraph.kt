@@ -32,10 +32,10 @@ fun NavGraphBuilder.addForecastGraph(
     ) {
         composable(ForecastRoutes.ForecastHome.route) { backStackEntry ->
             ForecastScreen(
-                onNavigateToDetail = { locationId ->
+                onNavigateToDetail = { locationName ->
                     // This is NOT an internal navigation. It's an external navigation request.
                     // The Forecast module requests the App module to handle navigation to detail.
-                    onNavigateOut(ForecastNavCallback.NavigateToDetail(locationId))
+                    onNavigateOut(ForecastNavCallback.NavigateToDetail(locationName))
                 }
             )
         }

@@ -1,5 +1,6 @@
 package com.forecaset.ui
 
+import coil.compose.AsyncImage
 import android.Manifest
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +36,7 @@ import com.forecaset.R
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ForecastScreen(
-    onNavigateToDetail: (locationId: String) -> Unit,
+    onNavigateToDetail: (cityName: String) -> Unit,
     viewModel: ForecastViewModel = hiltViewModel()
 ) {
     val currentWeather by viewModel.currentWeather.collectAsStateWithLifecycle()
@@ -107,18 +109,27 @@ fun ForecastScreen(
                 val weather = result.data
                 if (weather != null) {
                     Text(stringResource(R.string.current_weather))
+                    weather.current?.condition?.icon?.let { iconUrl ->
+                        AsyncImage(
+                            model = "https:${iconUrl}",
+                            contentDescription = stringResource(R.string.weather_condition_icon),
+                            modifier = Modifier.size(64.dp)
+                        )
+                    }
                     Text(stringResource(R.string.location, weather.location?.name ?: ""))
                     Text(stringResource(R.string.temperature_c, weather.current?.tempC ?: ""))
                     Text(stringResource(R.string.condition, weather.current?.condition?.text ?: ""))
                     Button(
                         onClick = {
-                            // todo handle navigation to detail screen
-                            /*onNavigateToDetail()*/
+                            weather.location?.name?.let {
+                                onNavigateToDetail(weather.location.name)
+                            }
                         },
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
                         Text(stringResource(R.string.view_detail, weather.location?.name ?: ""))
                     }
+
                 } else {
                     Text(stringResource(R.string.no_weather_data_available))
                 }

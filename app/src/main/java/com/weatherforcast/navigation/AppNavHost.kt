@@ -29,7 +29,7 @@ fun AppNavHost(
             onNavigateOut = { callback ->
                 when (callback) {
                     is ForecastNavCallback.NavigateToDetail -> {
-                        navController.navigate(DetailRoutes.ItemDetail.createRoute(callback.locationId))
+                        navController.navigate(DetailRoutes.ItemDetail.createRoute(callback.locationName))
                     }
                 }
             }
