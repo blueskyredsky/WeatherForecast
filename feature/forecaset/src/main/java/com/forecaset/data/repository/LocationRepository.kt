@@ -13,9 +13,9 @@ interface LocationRepository {
     fun getLocationUpdates(): Flow<Location>
 
     /**
-     * Returns a flow that emits the last known location, or null if not available.
+     * Returns the last known location.
      */
-    fun getLastKnownLocation(): Flow<Location?>
+    suspend fun getLastKnownLocation(): Location?
 
     /**
      * Returns a flow that emits whether location services are enabled.

@@ -11,14 +11,13 @@ import javax.inject.Inject
 class DefaultLocationRepository @Inject constructor(
     private val locationProvider: LocationProvider,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
-) :
-    LocationRepository {
+) : LocationRepository {
     override fun getLocationUpdates(): Flow<Location> {
         return locationProvider.getLocationUpdates().flowOn(ioDispatcher)
     }
 
-    override fun getLastKnownLocation(): Flow<Location?> {
-        return locationProvider.getLastKnownLocation().flowOn(ioDispatcher)
+    override suspend fun getLastKnownLocation(): Location? {
+        return locationProvider.getLastKnownLocation()
     }
 
     override fun isLocationEnabled(): Flow<Boolean> {

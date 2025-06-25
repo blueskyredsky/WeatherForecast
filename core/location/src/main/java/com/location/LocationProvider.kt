@@ -15,11 +15,11 @@ interface LocationProvider {
     fun getLocationUpdates(): Flow<Location>
 
     /**
-     * Returns a [Flow] that emits the last known location.
+     * Returns the last known location.
      *
-     * @return A [Flow] of nullable [Location] objects.
+     * @return The last known [Location] object, or null if not available.
      */
-    fun getLastKnownLocation(): Flow<Location?>
+    suspend fun getLastKnownLocation(): Location?
 
     /**
      * Returns a [Flow] that emits whether location services are enabled.

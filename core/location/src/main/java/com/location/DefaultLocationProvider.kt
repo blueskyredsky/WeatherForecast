@@ -66,20 +66,16 @@ class DefaultLocationProvider @Inject constructor(
     }
 
     @SuppressLint("MissingPermission")
-    override fun getLastKnownLocation(): Flow<Location?> = callbackFlow {
+    override suspend fun getLastKnownLocation(): Location? {
         if (!hasLocationPermissions()) {
-            close(Exception("Location permissions not granted"))
-            return@callbackFlow
+            throw Exception("Location permissions not granted")
         }
 
-        try {
-            val location = fusedLocationClient.lastLocation.await()
-            trySend(location)
+        return try {
+            fusedLocationClient.lastLocation.await()
         } catch (e: Exception) {
-            trySend(null)
-            close(e)
+            null
         }
-        awaitClose { /* No specific cleanup needed for a one-shot operation */ }
     }
 
     override fun isLocationEnabled(): Flow<Boolean> {

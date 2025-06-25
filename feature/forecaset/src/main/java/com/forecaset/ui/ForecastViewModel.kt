@@ -75,21 +75,19 @@ class ForecastViewModel @Inject constructor(
                     // Handle cases where getLocationUpdates might fail (e.g., permissions revoked mid-update)
                     _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
                     // Fallback to last known location if updates fail
-                    locationRepository.getLastKnownLocation()
-                        .onEach { lastLocation ->
-                            if (lastLocation != null) {
-                                fetchWeather(lastLocation)
-                            } else {
-                                _currentWeather.value = Result.Error(
-                                    Exception("Could not get current or last known location."),
-                                    ErrorType.UNKNOWN
-                                )
-                            }
+                    try {
+                        locationRepository.getLastKnownLocation()?.let { lastLocation ->
+                            fetchWeather(lastLocation)
+                        } ?: run {
+                            _currentWeather.value = Result.Error(
+                                Exception("Could not get current or last known location."),
+                                ErrorType.UNKNOWN
+                            )
                         }
-                        .catch { eLast ->
-                            _currentWeather.value = Result.Error(eLast, ErrorType.UNKNOWN)
-                        }
-                        .collect{}
+                    } catch (e: Exception) {
+                        // Catch exceptions from getLastKnownLocation(), e.g., "Location permissions not granted"
+                        _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
+                    }
                 }
                 .collect{}
         }
