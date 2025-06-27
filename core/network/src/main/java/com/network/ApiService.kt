@@ -9,4 +9,6 @@ interface ApiService {
 
     @GET("current.json")
     suspend fun fetchCurrentWeather(@Query("q") location: String): Response<CurrentWeatherDTO>
+
+
 }
