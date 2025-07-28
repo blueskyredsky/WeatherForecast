@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun DetailScreen(
-    itemId: String,
+    locationName: String,
     onGoBackToForecast: () -> Unit // Callback to signal navigation back to Forecast
 ) {
     Column(
@@ -21,7 +21,7 @@ fun DetailScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Detail Screen for Item ID: $itemId")
+        Text(text = "Detail Screen for: $locationName")
         Button(
             onClick = onGoBackToForecast,
             modifier = Modifier.padding(top = 16.dp)

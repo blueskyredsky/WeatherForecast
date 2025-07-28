@@ -67,8 +67,8 @@ fun NavController.navigateToForecastGraph() {
     }
 }
 
-fun NavController.navigateToDetailGraph(itemId: String) {
-    navigate(DetailRoutes.ItemDetail.createRoute(itemId)) {
+fun NavController.navigateToDetailGraph(locationName: String) {
+    navigate(DetailRoutes.ItemDetail.createRoute(locationName)) {
         popUpTo(graph.startDestinationId) { saveState = true }
         launchSingleTop = true
         restoreState = true

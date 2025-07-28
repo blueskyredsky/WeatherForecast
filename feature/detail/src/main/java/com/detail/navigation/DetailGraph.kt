@@ -2,7 +2,9 @@ package com.detail.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType.Companion.StringType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.detail.ui.DetailScreen
 
@@ -30,12 +32,12 @@ fun NavGraphBuilder.addDetailGraph(
         composable(
             route = DetailRoutes.ItemDetail.route,
             arguments = listOf(
-                androidx.navigation.navArgument("itemId") { type = androidx.navigation.NavType.StringType }
+                navArgument("locationName") { type = StringType }
             )
         ) { backStackEntry ->
-            val itemId = backStackEntry.arguments?.getString("itemId")
+            val locationName = backStackEntry.arguments?.getString("locationName")
             DetailScreen(
-                itemId = itemId ?: "N/A",
+                locationName = locationName ?: "N/A",
                 onGoBackToForecast = {
                     // This is an external navigation request.
                     // The Detail module requests the App module to handle navigation back to Forecast.
