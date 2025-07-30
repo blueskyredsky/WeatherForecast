@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -51,7 +52,6 @@ class ForecastViewModel @Inject constructor(
     fun fetchWeatherOnLocation() {
         if (!locationRepository.hasLocationPermissions()) {
             _requestLocationPermissions.value = true
-            // Now, instead of returning, set a specific error type
             _currentWeather.value = Result.Error(Exception("Location permissions denied."), ErrorType.LOCATION_PERMISSIONS_DENIED)
             return
         }
@@ -64,15 +64,12 @@ class ForecastViewModel @Inject constructor(
         viewModelScope.launch {
             _currentWeather.value = Result.Loading
 
-            // Try to get location updates first, if not available, fall back to last known location.
             locationRepository.getLocationUpdates()
                 .onEach { location ->
                     fetchWeather(location)
-                    // For continuous weather updates based on location, remove the return statement.
-                    return@onEach
+                    return@onEach // Only take the first successful location update for initial fetch
                 }
                 .catch { e ->
-                    // Handle cases where getLocationUpdates might fail (e.g., permissions revoked mid-update)
                     _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
                     // Fallback to last known location if updates fail
                     try {
@@ -85,11 +82,10 @@ class ForecastViewModel @Inject constructor(
                             )
                         }
                     } catch (e: Exception) {
-                        // Catch exceptions from getLastKnownLocation(), e.g., "Location permissions not granted"
                         _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
                     }
                 }
-                .collect{}
+                .collect()
         }
     }
 
@@ -111,13 +107,13 @@ class ForecastViewModel @Inject constructor(
 
     fun onLocationPermissionsGranted() {
         _locationPermissionGranted.value = true
-        _requestLocationPermissions.value = false // Reset request flag
+        _requestLocationPermissions.value = false
         fetchWeatherOnLocation()
     }
 
     fun onLocationPermissionsDenied() {
         _locationPermissionGranted.value = false
-        _requestLocationPermissions.value = false // Reset request flag
+        _requestLocationPermissions.value = false
         _currentWeather.value = Result.Error(Exception("Location permissions denied. Cannot fetch weather."))
     }
 
