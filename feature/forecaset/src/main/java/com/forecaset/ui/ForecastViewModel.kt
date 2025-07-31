@@ -111,12 +111,6 @@ class ForecastViewModel @Inject constructor(
         fetchWeatherOnLocation()
     }
 
-    fun onLocationPermissionsDenied() {
-        _locationPermissionGranted.value = false
-        _requestLocationPermissions.value = false
-        _currentWeather.value = Result.Error(Exception("Location permissions denied. Cannot fetch weather."))
-    }
-
     fun permissionRequestHandled() {
         _requestLocationPermissions.value = false
     }

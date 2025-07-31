@@ -18,4 +18,6 @@
     <string name="fetch_weather">Fetch Weather</string>
     <string name="retry">Retry</string>
     <string name="weather_condition_icon">Weather condition icon</string>
+    <string name="location_permission_permanently_denied_please_enable_in_settings">Location permission permanently denied. Please enable it in app settings.</string>
+    <string name="open_settings">Open Settings</string>
 </resources>
