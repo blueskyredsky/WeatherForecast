@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -38,54 +39,66 @@ class ForecastViewModel @Inject constructor(
 
     fun checkLocationPermission() {
         _locationPermissionGranted.value = locationRepository.hasLocationPermissions()
+        if (!locationPermissionGranted.value) {
+            _requestLocationPermissions.value = true
+            _currentWeather.value = Result.Error(Exception("Location permissions denied."), ErrorType.LOCATION_PERMISSIONS_DENIED)
+        }
     }
 
-    fun checkLocationServiceStatus() {
+    fun startObservingLocationAndWeather() {
         locationRepository.isLocationEnabled()
             .onEach { isEnabled ->
+                if (!isEnabled) {
+                    _currentWeather.value = Result.Error(Exception("Location services are disabled."), ErrorType.LOCATION_SERVICES_DISABLED)
+                }
                 _locationEnabled.value = isEnabled
             }
             .launchIn(viewModelScope)
+
+        combine(locationPermissionGranted, locationEnabled) { permissionGranted, locationEnabled ->
+            permissionGranted && locationEnabled
+        }.onEach { shouldFetch ->
+            if (shouldFetch) {
+                fetchWeatherOnLocation()
+            }
+        }.launchIn(viewModelScope)
+
+        checkLocationPermission()
     }
 
 
-    fun fetchWeatherOnLocation() {
-        if (!locationRepository.hasLocationPermissions()) {
-            _requestLocationPermissions.value = true
-            _currentWeather.value = Result.Error(Exception("Location permissions denied."), ErrorType.LOCATION_PERMISSIONS_DENIED)
-            return
-        }
+    private fun fetchWeatherOnLocation() {
+        if (_currentWeather.value is Result.Loading) return
 
-        if (!_locationEnabled.value) {
-            _currentWeather.value = Result.Error(Exception("Location services are disabled."), ErrorType.LOCATION_SERVICES_DISABLED)
-            return
-        }
+        _currentWeather.value = Result.Loading
 
         viewModelScope.launch {
-            _currentWeather.value = Result.Loading
-
-            locationRepository.getLocationUpdates()
-                .onEach { location ->
-                    fetchWeather(location)
-                    return@onEach // Only take the first successful location update for initial fetch
-                }
-                .catch { e ->
-                    _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
-                    // Fallback to last known location if updates fail
-                    try {
-                        locationRepository.getLastKnownLocation()?.let { lastLocation ->
-                            fetchWeather(lastLocation)
-                        } ?: run {
-                            _currentWeather.value = Result.Error(
-                                Exception("Could not get current or last known location."),
-                                ErrorType.UNKNOWN
-                            )
-                        }
-                    } catch (e: Exception) {
-                        _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
+            try {
+                locationRepository.getLocationUpdates()
+                    .onEach { location ->
+                        fetchWeather(location)
+                        return@onEach // Only take the first successful location update for initial fetch
                     }
-                }
-                .collect()
+                    .catch { e ->
+                        _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
+                        // Fallback to last known location if updates fail
+                        try {
+                            locationRepository.getLastKnownLocation()?.let { lastLocation ->
+                                fetchWeather(lastLocation)
+                            } ?: run {
+                                _currentWeather.value = Result.Error(
+                                    Exception("Could not get current or last known location."),
+                                    ErrorType.UNKNOWN
+                                )
+                            }
+                        } catch (e: Exception) {
+                            _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
+                        }
+                    }
+                    .collect()
+            } catch (e: Exception) {
+                _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
+            }
         }
     }
 
@@ -108,10 +121,14 @@ class ForecastViewModel @Inject constructor(
     fun onLocationPermissionsGranted() {
         _locationPermissionGranted.value = true
         _requestLocationPermissions.value = false
-        fetchWeatherOnLocation()
     }
 
     fun permissionRequestHandled() {
         _requestLocationPermissions.value = false
+    }
+
+    fun retryFetchWeather() {
+        _currentWeather.value = null
+        fetchWeatherOnLocation()
     }
 }
