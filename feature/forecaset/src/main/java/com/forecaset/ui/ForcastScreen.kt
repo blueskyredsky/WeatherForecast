@@ -31,9 +31,13 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.common.model.Result
 import com.google.accompanist.permissions.shouldShowRationale
 import android.provider.Settings
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewModelScope
 import com.common.model.ErrorType
 import com.forecaset.R
@@ -71,8 +75,18 @@ fun ForecastScreen(
         )
     )
 
-    LaunchedEffect(Unit) {
-        viewModel.startObservingLocationAndWeather()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.startObservingLocationAndWeather()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     LaunchedEffect(requestLocationPermissions) {
