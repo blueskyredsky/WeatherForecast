@@ -75,6 +75,7 @@ fun ForecastScreen(
         )
     )
 
+    // to fetch weather when the app is in the foreground
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
