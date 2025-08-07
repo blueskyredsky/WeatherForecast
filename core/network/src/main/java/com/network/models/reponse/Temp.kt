@@ -1,74 +1,20 @@
-package com.network.models.reponse
+import com.network.models.reponse.CurrentDTO
+import com.network.models.reponse.LocationDTO
+import kotlinx.serialization.SerialName
 
-
-data class Root(
-    val location: Location,
-    val current: Current,
-    val forecast: Forecast,
-    val alerts: Alerts,
+data class ForecastResponseDTO(
+    val location: LocationDTO,
+    val current: CurrentDTO,
+    val forecast: ForecastDTO,
 )
 
-data class Location(
-    val name: String,
-    val region: String,
-    val country: String,
-    val lat: Double,
-    val lon: Double,
-    val tzId: String,
-    val localtimeEpoch: Long,
-    val localtime: String,
+data class ForecastDTO(
+    val forecastDay: List<ForecastDayDTO>,
 )
 
-data class Current(
-    val lastUpdatedEpoch: Long,
-    val lastUpdated: String,
-    val tempC: Double,
-    val tempF: Double,
-    val isDay: Long,
-    val condition: Condition,
-    val windMph: Double,
-    val windKph: Double,
-    val windDegree: Long,
-    val windDir: String,
-    val pressureMb: Long,
-    val pressureIn: Double,
-    val precipMm: Long,
-    val precipIn: Long,
-    val humidity: Long,
-    val cloud: Long,
-    val feelslikeC: Long,
-    val feelslikeF: Double,
-    val visKm: Long,
-    val visMiles: Long,
-    val uv: Long,
-    val gustMph: Double,
-    val gustKph: Double,
-    val airQuality: AirQuality,
-)
-
-data class Condition(
-    val text: String,
-    val icon: String,
-    val code: Long,
-)
-
-data class AirQuality(
-    val co: Double,
-    val no2: Double,
-    val o3: Double,
-    val so2: Long,
-    val pm25: Double,
-    val pm10: Long,
-    val usEpaIndex: Long,
-    val gbDefraIndex: Long,
-)
-
-data class Forecast(
-    val forecastday: List<Forecastday>,
-)
-
-data class Forecastday(
+data class ForecastDayDTO(
     val date: String,
+    @SerialName("date_epoch")
     val dateEpoch: Long,
     val day: Day,
     val astro: Astro,
@@ -76,25 +22,43 @@ data class Forecastday(
 )
 
 data class Day(
+    @SerialName("maxtemp_c")
     val maxtempC: Double,
+    @SerialName("maxtemp_f")
     val maxtempF: Double,
+    @SerialName("mintemp_c")
     val mintempC: Double,
+    @SerialName("mintemp_f")
     val mintempF: Double,
+    @SerialName("avgtemp_c")
     val avgtempC: Double,
+    @SerialName("avgtemp_f")
     val avgtempF: Double,
+    @SerialName("maxwind_mph")
     val maxwindMph: Double,
+    @SerialName("maxwind_kph")
     val maxwindKph: Double,
-    val totalprecipMm: Long,
-    val totalprecipIn: Long,
-    val avgvisKm: Long,
-    val avgvisMiles: Long,
+    @SerialName("totalprecip_mm")
+    val totalprecipMm: Double,
+    @SerialName("totalprecip_in")
+    val totalprecipIn: Double,
+    @SerialName("totalsnow_cm")
+    val totalsnowCm: Double,
+    @SerialName("avgvis_km")
+    val avgvisKm: Double,
+    @SerialName("avgvis_miles")
+    val avgvisMiles: Double,
     val avghumidity: Long,
+    @SerialName("daily_will_it_rain")
     val dailyWillItRain: Long,
+    @SerialName("daily_chance_of_rain")
     val dailyChanceOfRain: Long,
+    @SerialName("daily_will_it_snow")
     val dailyWillItSnow: Long,
+    @SerialName("daily_chance_of_snow")
     val dailyChanceOfSnow: Long,
     val condition: Condition2,
-    val uv: Long,
+    val uv: Double,
 )
 
 data class Condition2(
@@ -108,68 +72,84 @@ data class Astro(
     val sunset: String,
     val moonrise: String,
     val moonset: String,
+    @SerialName("moon_phase")
     val moonPhase: String,
-    val moonIllumination: String,
+    @SerialName("moon_illumination")
+    val moonIllumination: Long,
+    @SerialName("is_moon_up")
+    val isMoonUp: Long,
+    @SerialName("is_sun_up")
+    val isSunUp: Long,
 )
 
 data class Hour(
+    @SerialName("time_epoch")
     val timeEpoch: Long,
     val time: String,
+    @SerialName("temp_c")
     val tempC: Double,
+    @SerialName("temp_f")
     val tempF: Double,
+    @SerialName("is_day")
     val isDay: Long,
     val condition: Condition3,
+    @SerialName("wind_mph")
     val windMph: Double,
+    @SerialName("wind_kph")
     val windKph: Double,
+    @SerialName("wind_degree")
     val windDegree: Long,
+    @SerialName("wind_dir")
     val windDir: String,
-    val pressureMb: Long,
+    @SerialName("pressure_mb")
+    val pressureMb: Double,
+    @SerialName("pressure_in")
     val pressureIn: Double,
-    val precipMm: Long,
-    val precipIn: Long,
+    @SerialName("precip_mm")
+    val precipMm: Double,
+    @SerialName("precip_in")
+    val precipIn: Double,
+    @SerialName("snow_cm")
+    val snowCm: Double,
     val humidity: Long,
     val cloud: Long,
+    @SerialName("feelslike_c")
     val feelslikeC: Double,
+    @SerialName("feelslike_f")
     val feelslikeF: Double,
+    @SerialName("windchill_c")
     val windchillC: Double,
+    @SerialName("windchill_f")
     val windchillF: Double,
+    @SerialName("heatindex_c")
     val heatindexC: Double,
+    @SerialName("heatindex_f")
     val heatindexF: Double,
+    @SerialName("dewpoint_c")
     val dewpointC: Double,
+    @SerialName("dewpoint_f")
     val dewpointF: Double,
+    @SerialName("will_it_rain")
     val willItRain: Long,
+    @SerialName("chance_of_rain")
     val chanceOfRain: Long,
+    @SerialName("will_it_snow")
     val willItSnow: Long,
+    @SerialName("chance_of_snow")
     val chanceOfSnow: Long,
-    val visKm: Long,
-    val visMiles: Long,
-    val gustMph: Long,
+    @SerialName("vis_km")
+    val visKm: Double,
+    @SerialName("vis_miles")
+    val visMiles: Double,
+    @SerialName("gust_mph")
+    val gustMph: Double,
+    @SerialName("gust_kph")
     val gustKph: Double,
-    val uv: Long,
+    val uv: Double,
 )
 
 data class Condition3(
     val text: String,
     val icon: String,
     val code: Long,
-)
-
-data class Alerts(
-    val alert: List<Alert>,
-)
-
-data class Alert(
-    val headline: String,
-    val msgtype: Any?,
-    val severity: Any?,
-    val urgency: Any?,
-    val areas: Any?,
-    val category: String,
-    val certainty: Any?,
-    val event: String,
-    val note: Any?,
-    val effective: String,
-    val expires: String,
-    val desc: String,
-    val instruction: String,
 )

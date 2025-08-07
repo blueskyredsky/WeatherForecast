@@ -11,4 +11,12 @@ interface ApiService {
     suspend fun fetchCurrentWeather(@Query("q") location: String): Response<CurrentWeatherDTO>
 
 
+    @GET("forecast.json")
+    suspend fun fetchForecast(
+        @Query("q") location: String,
+        @Query("days") days: Int = 3,
+        @Query("aqi") aqi: Boolean = false,
+        @Query("alerts") alerts: Boolean = false
+    ): Response<CurrentWeatherDTO>
+
 }
