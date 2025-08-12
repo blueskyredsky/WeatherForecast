@@ -1,4 +1,4 @@
-package com.network.models.reponse
+package com.network.models.reponse.currentweather
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -1,6 +1,6 @@
-package com.forecaset.data.model
+package com.forecaset.data.model.currentweather
 
-import com.network.models.reponse.CurrentDTO
+import com.network.models.reponse.currentweather.CurrentDTO
 
 data class Current(
     val cloud: Int,

@@ -1,6 +1,6 @@
-package com.forecaset.data.model
+package com.forecaset.data.model.currentweather
 
-import com.network.models.reponse.LocationDTO
+import com.network.models.reponse.currentweather.LocationDTO
 
 data class Location(
     val country: String,

@@ -1,7 +1,7 @@
 package com.network
 
-import ForecastResponseDTO
-import com.network.models.reponse.CurrentWeatherDTO
+import ForecastDTO
+import com.network.models.reponse.currentweather.CurrentWeatherDTO
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -18,5 +18,5 @@ interface ApiService {
         @Query("days") days: Int = 3,
         @Query("aqi") aqi: Boolean = false,
         @Query("alerts") alerts: Boolean = false
-    ): Response<ForecastResponseDTO>
+    ): Response<ForecastDTO>
 }

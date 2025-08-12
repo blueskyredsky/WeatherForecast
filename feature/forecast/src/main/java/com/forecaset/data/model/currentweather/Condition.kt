@@ -1,6 +1,6 @@
-package com.forecaset.data.model
+package com.forecaset.data.model.currentweather
 
-import com.network.models.reponse.ConditionDTO
+import com.network.models.reponse.currentweather.ConditionDTO
 
 data class Condition(
     val code: Int,

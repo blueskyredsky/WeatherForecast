@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.common.model.ErrorType
 import com.common.model.Result
-import com.forecaset.data.model.CurrentWeather
+import com.forecaset.data.model.currentweather.CurrentWeather
 import com.forecaset.data.repository.ForecastRepository
 import com.forecaset.data.repository.LocationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

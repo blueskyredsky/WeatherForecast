@@ -1,8 +1,8 @@
 package com.forecaset.data.repository
 
-import com.forecaset.data.model.CurrentWeather
-import com.forecaset.data.model.error.RepositoryError
-import com.forecaset.data.model.toCurrentWeatherResult
+import com.forecaset.data.model.currentweather.CurrentWeather
+import com.common.model.error.RepositoryError
+import com.forecaset.data.model.currentweather.toCurrentWeatherResult
 import com.network.ApiService
 import com.reza.threading.common.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
