@@ -2,6 +2,7 @@ package com.network.models.reponse.forecast
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import com.network.models.reponse.currentweather.ConditionDTO
 
 @Serializable
 data class HourDTO(

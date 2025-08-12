@@ -1,5 +1,6 @@
 package com.network.models.reponse.forecast
 
+import com.network.models.reponse.currentweather.ConditionDTO
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
