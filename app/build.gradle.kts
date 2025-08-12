@@ -44,7 +44,7 @@ android {
 dependencies {
 
     // projects
-    implementation(projects.feature.forecaset)
+    implementation(projects.feature.forecast)
     implementation(projects.feature.detail)
 
     implementation(libs.androidx.core.ktx)

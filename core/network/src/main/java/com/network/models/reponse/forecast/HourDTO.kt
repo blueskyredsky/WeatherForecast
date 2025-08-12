@@ -1,6 +1,5 @@
 package com.network.models.reponse.forecast
 
-import Condition3
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
