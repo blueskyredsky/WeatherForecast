@@ -2,13 +2,11 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.dagger.hilt.android)
-    alias(libs.plugins.kotlin.kapt)
 }
 
 android {
-    namespace = "com.forecaset"
-    compileSdk = 35
+    namespace = "com.forecast"
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
@@ -40,12 +38,6 @@ android {
 
 dependencies {
 
-    // projects
-    implementation(projects.core.network)
-    implementation(projects.core.location)
-    implementation(projects.core.threading)
-    implementation(projects.core.common)
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -60,21 +52,10 @@ dependencies {
 
     // AndroidX Navigation for Compose
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.hilt.navigation.compose)
 
     // AndroidX Lifecycle for ViewModel support
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-
-    // di
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
-
-    // Accompanist for permissions
-    implementation(libs.accompanist.permissions)
-
-    // Coil
-    implementation(libs.coil.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

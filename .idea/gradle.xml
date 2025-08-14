@@ -18,7 +18,7 @@
             <option value="$PROJECT_DIR$/core/threading" />
             <option value="$PROJECT_DIR$/feature" />
             <option value="$PROJECT_DIR$/feature/detail" />
-            <option value="$PROJECT_DIR$/feature/forecaset" />
+            <option value="$PROJECT_DIR$/feature/forecast" />
           </set>
         </option>
       </GradleProjectSettings>

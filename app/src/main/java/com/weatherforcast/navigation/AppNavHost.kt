@@ -6,42 +6,42 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.detail.navigation.DetailNavCallback
-import com.detail.navigation.DetailRoutes
-import com.detail.navigation.addDetailGraph
-import com.forecaset.navigation.FORECAST_GRAPH_ROUTE
-import com.forecaset.navigation.ForecastNavCallback
-import com.forecaset.navigation.addForecastGraph
+import com.currentweather.navigation.CURRENT_WEATHER_GRAPH_ROUTE
+import com.currentweather.navigation.CurrentWeatherNavCallback
+import com.currentweather.navigation.addCurrentWeatherGraph
+import com.forecast.navigation.ForecastNavCallback
+import com.forecast.navigation.ForecastRoutes
+import com.forecast.navigation.addForecastGraph
 
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = FORECAST_GRAPH_ROUTE
+    startDestination: String = CURRENT_WEATHER_GRAPH_ROUTE
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
-        addForecastGraph(
+        addCurrentWeatherGraph(
             navController = navController,
             onNavigateOut = { callback ->
                 when (callback) {
-                    is ForecastNavCallback.NavigateToDetail -> {
-                        navController.navigate(DetailRoutes.ItemDetail.createRoute(callback.locationName))
+                    is CurrentWeatherNavCallback.NavigateToDetail -> {
+                        navController.navigate(ForecastRoutes.ItemForecast.createRoute(callback.locationName))
                     }
                 }
             }
         )
 
-        addDetailGraph(
+        addForecastGraph(
             navController = navController,
             onNavigateOut = { callback ->
                 when (callback) {
-                    is DetailNavCallback.NavigateBackToForecastHome -> {
-                        navController.navigate(FORECAST_GRAPH_ROUTE) {
-                            popUpTo(FORECAST_GRAPH_ROUTE) { inclusive = true }
+                    is ForecastNavCallback.NavigateBackToForecastHome -> {
+                        navController.navigate(CURRENT_WEATHER_GRAPH_ROUTE) {
+                            popUpTo(CURRENT_WEATHER_GRAPH_ROUTE) { inclusive = true }
                             launchSingleTop = true
                         }
                     }
@@ -58,8 +58,8 @@ fun AppNavHost(
  * These are defined in the app module because the app module knows about all top-level
  * feature graphs and their root routes.
  */
-fun NavController.navigateToForecastGraph() {
-    navigate(FORECAST_GRAPH_ROUTE) {
+fun NavController.navigateToCurrentWeatherGraph() {
+    navigate(CURRENT_WEATHER_GRAPH_ROUTE) {
         // Common navigation options for top-level tabs/features
         popUpTo(graph.startDestinationId) { saveState = true }
         launchSingleTop = true
@@ -68,7 +68,7 @@ fun NavController.navigateToForecastGraph() {
 }
 
 fun NavController.navigateToDetailGraph(locationName: String) {
-    navigate(DetailRoutes.ItemDetail.createRoute(locationName)) {
+    navigate(ForecastRoutes.ItemForecast.createRoute(locationName)) {
         popUpTo(graph.startDestinationId) { saveState = true }
         launchSingleTop = true
         restoreState = true
