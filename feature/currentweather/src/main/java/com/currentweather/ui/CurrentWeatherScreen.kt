@@ -29,6 +29,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.common.model.Result
 import com.google.accompanist.permissions.shouldShowRationale
 import android.provider.Settings
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -86,180 +87,184 @@ fun CurrentWeatherScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = stringResource(R.string.current_weather_home_screen),
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+    Scaffold(snackbarHost = {
+        // todo to be completed
+    }) { innerPadding ->
+        Column(
+            modifier = Modifier.padding(innerPadding)
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.current_weather_home_screen),
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
-        when (val result = currentWeather) {
-            null -> {
-                Text(
-                    textAlign = TextAlign.Center,
-                    text = stringResource(R.string.waiting_for_weather_data)
-                )
-            }
-
-            Result.Loading -> {
-                CircularProgressIndicator()
-                Text(textAlign = TextAlign.Center, text = stringResource(R.string.fetching_weather))
-            }
-
-            is Result.Success -> {
-                val weather = result.data
-                if (weather != null) {
+            when (val result = currentWeather) {
+                null -> {
                     Text(
                         textAlign = TextAlign.Center,
-                        text = stringResource(R.string.current_weather)
+                        text = stringResource(R.string.waiting_for_weather_data)
                     )
+                }
 
-                    weather.current?.condition?.icon?.let { iconUrl ->
-                        AsyncImage(
-                            model = "https:${iconUrl}",
-                            contentDescription = stringResource(R.string.weather_condition_icon),
-                            modifier = Modifier.size(64.dp)
+                Result.Loading -> {
+                    CircularProgressIndicator()
+                    Text(textAlign = TextAlign.Center, text = stringResource(R.string.fetching_weather))
+                }
+
+                is Result.Success -> {
+                    val weather = result.data
+                    if (weather != null) {
+                        Text(
+                            textAlign = TextAlign.Center,
+                            text = stringResource(R.string.current_weather)
                         )
-                    }
 
-                    Text(
-                        textAlign = TextAlign.Center,
-                        text = stringResource(R.string.location, weather.location?.name ?: "")
-                    )
-                    Text(
-                        textAlign = TextAlign.Center,
-                        text = stringResource(R.string.temperature_c, weather.current?.tempC ?: "")
-                    )
-                    Text(
-                        textAlign = TextAlign.Center,
-                        text = stringResource(
-                            R.string.condition,
-                            weather.current?.condition?.text ?: ""
+                        weather.current?.condition?.icon?.let { iconUrl ->
+                            AsyncImage(
+                                model = "https:${iconUrl}",
+                                contentDescription = stringResource(R.string.weather_condition_icon),
+                                modifier = Modifier.size(64.dp)
+                            )
+                        }
+
+                        Text(
+                            textAlign = TextAlign.Center,
+                            text = stringResource(R.string.location, weather.location?.name ?: "")
                         )
-                    )
-
-                    Button(
-                        onClick = {
-                            weather.location?.name?.let {
-                                onNavigateToDetail(weather.location.name)
-                            }
-                        },
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) {
+                        Text(
+                            textAlign = TextAlign.Center,
+                            text = stringResource(R.string.temperature_c, weather.current?.tempC ?: "")
+                        )
                         Text(
                             textAlign = TextAlign.Center,
                             text = stringResource(
-                                R.string.view_detail,
-                                weather.location?.name ?: ""
+                                R.string.condition,
+                                weather.current?.condition?.text ?: ""
                             )
                         )
-                    }
 
-                } else {
-                    Text(
-                        textAlign = TextAlign.Center,
-                        text = stringResource(R.string.no_weather_data_available)
-                    )
-                }
-            }
-
-            is Result.Error -> {
-                val errorMessage =
-                    result.exception.message ?: stringResource(R.string.an_unknown_error_occurred)
-                Text(
-                    textAlign = TextAlign.Center,
-                    text = stringResource(R.string.error, errorMessage),
-                    color = MaterialTheme.colorScheme.error
-                )
-
-                Spacer(Modifier.height(8.dp))
-
-                when (result.errorType) {
-                    ErrorType.LOCATION_SERVICES_DISABLED -> {
-                        Button(onClick = {
-                            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                            context.startActivity(intent)
-                        }) {
+                        Button(
+                            onClick = {
+                                weather.location?.name?.let {
+                                    onNavigateToDetail(weather.location.name)
+                                }
+                            },
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) {
                             Text(
                                 textAlign = TextAlign.Center,
-                                text = stringResource(R.string.enable_location_services)
+                                text = stringResource(
+                                    R.string.view_detail,
+                                    weather.location?.name ?: ""
+                                )
                             )
                         }
+
+                    } else {
+                        Text(
+                            textAlign = TextAlign.Center,
+                            text = stringResource(R.string.no_weather_data_available)
+                        )
                     }
+                }
 
-                    ErrorType.LOCATION_PERMISSIONS_DENIED -> {
-                        val showRationale =
-                            locationPermissionsState.permissions.any { it.status.shouldShowRationale }
-                        val permanentlyDenied = !locationPermissionsState.allPermissionsGranted &&
-                                !locationPermissionsState.permissions.any { it.status.shouldShowRationale }
+                is Result.Error -> {
+                    val errorMessage =
+                        result.exception.message ?: stringResource(R.string.an_unknown_error_occurred)
+                    Text(
+                        textAlign = TextAlign.Center,
+                        text = stringResource(R.string.error, errorMessage),
+                        color = MaterialTheme.colorScheme.error
+                    )
 
-                        if (permanentlyDenied) {
-                            Text(
-                                textAlign = TextAlign.Center,
-                                text = stringResource(R.string.location_permission_permanently_denied_please_enable_in_settings)
-                            )
+                    Spacer(Modifier.height(8.dp))
+
+                    when (result.errorType) {
+                        ErrorType.LOCATION_SERVICES_DISABLED -> {
                             Button(onClick = {
-                                val intent =
-                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                        data = Uri.fromParts("package", context.packageName, null)
-                                    }
+                                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                                 context.startActivity(intent)
                             }) {
                                 Text(
                                     textAlign = TextAlign.Center,
-                                    text = stringResource(R.string.open_settings)
-                                )
-                            }
-                        } else if (showRationale) {
-                            Text(
-                                textAlign = TextAlign.Center,
-                                text = stringResource(R.string.location_permission_is_important_for_this_app_please_grant_it)
-                            )
-                            Button(onClick = {
-                                locationPermissionsState.launchMultiplePermissionRequest()
-                            }) {
-                                Text(
-                                    textAlign = TextAlign.Center,
-                                    text = stringResource(R.string.request_permission_again)
-                                )
-                            }
-                        } else {
-                            Button(onClick = {
-                                locationPermissionsState.launchMultiplePermissionRequest()
-                            }) {
-                                Text(
-                                    textAlign = TextAlign.Center,
-                                    text = stringResource(R.string.grant_location_permissions)
+                                    text = stringResource(R.string.enable_location_services)
                                 )
                             }
                         }
-                    }
 
-                    ErrorType.UNKNOWN -> {
-                        Button(onClick = {
-                            viewModel.retryFetchWeather()
-                        }) {
-                            Text(
-                                textAlign = TextAlign.Center,
-                                text = stringResource(R.string.retry)
-                            )
+                        ErrorType.LOCATION_PERMISSIONS_DENIED -> {
+                            val showRationale =
+                                locationPermissionsState.permissions.any { it.status.shouldShowRationale }
+                            val permanentlyDenied = !locationPermissionsState.allPermissionsGranted &&
+                                    !locationPermissionsState.permissions.any { it.status.shouldShowRationale }
+
+                            if (permanentlyDenied) {
+                                Text(
+                                    textAlign = TextAlign.Center,
+                                    text = stringResource(R.string.location_permission_permanently_denied_please_enable_in_settings)
+                                )
+                                Button(onClick = {
+                                    val intent =
+                                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                            data = Uri.fromParts("package", context.packageName, null)
+                                        }
+                                    context.startActivity(intent)
+                                }) {
+                                    Text(
+                                        textAlign = TextAlign.Center,
+                                        text = stringResource(R.string.open_settings)
+                                    )
+                                }
+                            } else if (showRationale) {
+                                Text(
+                                    textAlign = TextAlign.Center,
+                                    text = stringResource(R.string.location_permission_is_important_for_this_app_please_grant_it)
+                                )
+                                Button(onClick = {
+                                    locationPermissionsState.launchMultiplePermissionRequest()
+                                }) {
+                                    Text(
+                                        textAlign = TextAlign.Center,
+                                        text = stringResource(R.string.request_permission_again)
+                                    )
+                                }
+                            } else {
+                                Button(onClick = {
+                                    locationPermissionsState.launchMultiplePermissionRequest()
+                                }) {
+                                    Text(
+                                        textAlign = TextAlign.Center,
+                                        text = stringResource(R.string.grant_location_permissions)
+                                    )
+                                }
+                            }
+                        }
+
+                        ErrorType.UNKNOWN -> {
+                            Button(onClick = {
+                                viewModel.retryFetchWeather()
+                            }) {
+                                Text(
+                                    textAlign = TextAlign.Center,
+                                    text = stringResource(R.string.retry)
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
 
-        Button(
-            onClick = { viewModel.retryFetchWeather() },
-            modifier = Modifier.padding(top = 16.dp),
-            enabled = locationPermissionGranted && locationEnabled
-        ) {
-            Text(stringResource(R.string.fetch_weather))
+            Button(
+                onClick = { viewModel.retryFetchWeather() },
+                modifier = Modifier.padding(top = 16.dp),
+                enabled = locationPermissionGranted && locationEnabled
+            ) {
+                Text(stringResource(R.string.fetch_weather))
+            }
         }
     }
 }
