@@ -25,6 +25,8 @@ class CurrentWeatherViewModel @Inject constructor(
     private val locationRepository: LocationRepository
 ) : ViewModel() {
 
+    private var hasFetchedCurrentWeather = false
+
     private val _currentWeather = MutableStateFlow<Result<CurrentWeather?>?>(null)
     val currentWeather = _currentWeather.asStateFlow()
 
@@ -68,37 +70,41 @@ class CurrentWeatherViewModel @Inject constructor(
 
 
     private fun fetchWeatherOnLocation() {
-        if (_currentWeather.value is Result.Loading) return
+        if (!hasFetchedCurrentWeather) {
+            if (_currentWeather.value is Result.Loading) return
 
-        _currentWeather.value = Result.Loading
+            _currentWeather.value = Result.Loading
 
-        viewModelScope.launch {
-            try {
-                locationRepository.getLocationUpdates()
-                    .onEach { location ->
-                        fetchWeather(location)
-                        return@onEach // Only take the first successful location update for initial fetch
-                    }
-                    .catch { e ->
-                        _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
-                        // Fallback to last known location if updates fail
-                        try {
-                            locationRepository.getLastKnownLocation()?.let { lastLocation ->
-                                fetchWeather(lastLocation)
-                            } ?: run {
-                                _currentWeather.value = Result.Error(
-                                    Exception("Could not get current or last known location."),
-                                    ErrorType.UNKNOWN
-                                )
-                            }
-                        } catch (e: Exception) {
-                            _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
+            viewModelScope.launch {
+                try {
+                    locationRepository.getLocationUpdates()
+                        .onEach { location ->
+                            fetchWeather(location)
+                            return@onEach // Only take the first successful location update for initial fetch
                         }
-                    }
-                    .collect()
-            } catch (e: Exception) {
-                _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
+                        .catch { e ->
+                            _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
+                            // Fallback to last known location if updates fail
+                            try {
+                                locationRepository.getLastKnownLocation()?.let { lastLocation ->
+                                    fetchWeather(lastLocation)
+                                } ?: run {
+                                    _currentWeather.value = Result.Error(
+                                        Exception("Could not get current or last known location."),
+                                        ErrorType.UNKNOWN
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
+                            }
+                        }
+                        .collect()
+                } catch (e: Exception) {
+                    _currentWeather.value = Result.Error(e, ErrorType.UNKNOWN)
+                }
             }
+
+            hasFetchedCurrentWeather = true
         }
     }
 

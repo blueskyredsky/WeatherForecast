@@ -41,7 +41,7 @@ fun AppNavHost(
                 when (callback) {
                     is ForecastNavCallback.NavigateBackToForecastHome -> {
                         navController.navigate(CURRENT_WEATHER_GRAPH_ROUTE) {
-                            popUpTo(CURRENT_WEATHER_GRAPH_ROUTE) { inclusive = true }
+                            /*popUpTo(CURRENT_WEATHER_GRAPH_ROUTE) { inclusive = true }*/
                             launchSingleTop = true
                         }
                     }

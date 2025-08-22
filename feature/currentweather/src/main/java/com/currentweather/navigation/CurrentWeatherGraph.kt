@@ -1,10 +1,12 @@
 package com.currentweather.navigation
 
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.currentweather.ui.CurrentWeatherScreen
+import com.currentweather.ui.CurrentWeatherViewModel
 
 /**
  * The root route for the entire CurrentWeather feature graph.
@@ -31,7 +33,9 @@ fun NavGraphBuilder.addCurrentWeatherGraph(
         route = CURRENT_WEATHER_GRAPH_ROUTE
     ) {
         composable(CurrentWeatherRoutes.CurrentWeatherHome.route) { backStackEntry ->
-           CurrentWeatherScreen(
+            val viewModel: CurrentWeatherViewModel = hiltViewModel()
+            CurrentWeatherScreen(
+                viewModel = viewModel,
                 onNavigateToDetail = { locationName ->
                     // This is NOT an internal navigation. It's an external navigation request.
                     // The current weather module requests the App module to handle navigation to detail.
