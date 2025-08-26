@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +22,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -55,21 +58,6 @@ fun CurrentWeatherScreen(
             Manifest.permission.ACCESS_FINE_LOCATION
         )
     )
-
-    // to fetch weather when the app is in the foreground
-    /*val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.startObservingLocationAndWeather()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }*/
 
     LaunchedEffect(Unit) {
         viewModel.startObservingLocationAndWeather()
@@ -114,13 +102,22 @@ fun CurrentWeatherScreen(
                 Result.Loading -> LoadingContent(modifier = Modifier.fillMaxSize())
 
                 is Result.Success -> {
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    val weatherData =
+                        viewModel.getWeatherUI(result.data?.current?.condition?.text ?: "")
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                color = colorResource(
+                                    weatherData
+                                        .backgroundColorResource
+                                )
+                            )
+                    ) {
                         Image(
                             modifier = Modifier.align(Alignment.Center),
-                            painter = painterResource(getBackgroundResource(
-                                result.data?.current?.condition?.text ?: ""
-                            )) ,
-                            contentDescription = ""
+                            painter = painterResource(weatherData.backgroundImageResource),
+                            contentDescription = "",
                         )
                         Column(
                             modifier = Modifier.fillMaxSize(),

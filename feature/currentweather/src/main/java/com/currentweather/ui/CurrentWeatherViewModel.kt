@@ -3,6 +3,7 @@ package com.currentweather.ui
 import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.common.R
 import com.common.model.ErrorType
 import com.common.model.Result
 import com.currentweather.data.model.currentweather.CurrentWeather
@@ -134,4 +135,18 @@ class CurrentWeatherViewModel @Inject constructor(
         _currentWeather.value = null
         fetchWeatherOnLocation()
     }
+
+    fun getWeatherUI(text: String): WeatherUI {
+        return when (text.lowercase()) {
+            "sunny" -> WeatherUI(R.drawable.ic_sunny, R.color.light_beige)
+            "cloudy" -> WeatherUI(R.drawable.ic_cloudy, R.color.pale_blue)
+            "rainy" -> WeatherUI(R.drawable.ic_rainy, R.color.dark_shade_blue)
+            else -> WeatherUI(R.drawable.ic_cloudy, R.color.pale_blue)
+        }
+    }
 }
+
+data class WeatherUI(
+    val backgroundImageResource: Int,
+    val backgroundColorResource: Int
+)
