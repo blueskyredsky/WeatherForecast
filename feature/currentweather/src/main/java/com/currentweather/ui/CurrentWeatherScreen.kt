@@ -4,15 +4,10 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -20,18 +15,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import com.common.model.ErrorType
 import com.common.model.Result
 import com.currentweather.R
@@ -76,113 +65,28 @@ fun CurrentWeatherScreen(
         }
     }
 
-    /*when (val result = currentWeather) {
-        is Result.Error -> {
-
-        }
-        Result.Loading -> LoadingContent(modifier = Modifier.fillMaxSize())
-
-        is Result.Success -> {
-
-        }
-        null -> Unit
-    }*/
-
     Scaffold(
         snackbarHost = {
-        // todo to be completed
-    }) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            when (val result = currentWeather) {
-                Result.Loading -> LoadingContent(modifier = Modifier.fillMaxSize())
+            // todo to be completed
+        }
+    ) { innerPadding ->
+        when (val result = currentWeather) {
+            Result.Loading -> LoadingContent(modifier = Modifier.fillMaxSize())
 
-                is Result.Success -> {
-                    val weatherData =
-                        viewModel.getWeatherUI(result.data?.current?.condition?.text ?: "")
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                color = colorResource(
-                                    weatherData
-                                        .backgroundColorResource
-                                )
-                            )
-                    ) {
-                        Image(
-                            modifier = Modifier.align(Alignment.Center),
-                            painter = painterResource(weatherData.backgroundImageResource),
-                            contentDescription = "",
-                        )
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                style = MaterialTheme.typography.bodyLarge,
-                                text = stringResource(R.string.today),
-                            )
+            is Result.Success -> {
+                SuccessContent(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    weatherData = viewModel.getWeatherUI(
+                        result.data?.current?.condition?.text ?: ""
+                    ),
+                    currentWeather = result.data,
+                    onNavigateToDetail = onNavigateToDetail
+                )
+            }
 
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            val weather = result.data
-                            if (weather != null) {
-                                Text(
-                                    text = "${weather.current?.tempC ?: ""}°",
-                                    style = MaterialTheme.typography.displayLarge.copy(fontSize = 100.sp),
-                                )
-
-                                Spacer(modifier = Modifier.height(32.dp))
-
-                                weather.current?.condition?.icon?.let { iconUrl ->
-                                    AsyncImage(
-                                        model = "https:${iconUrl}",
-                                        contentDescription = stringResource(R.string.weather_condition_icon),
-                                        modifier = Modifier.size(64.dp)
-                                    )
-                                }
-
-                                Text(
-                                    textAlign = TextAlign.Center,
-                                    text = stringResource(
-                                        R.string.condition,
-                                        weather.current?.condition?.text ?: ""
-                                    )
-                                )
-
-                                Button(
-                                    onClick = {
-                                        weather.location?.name?.let {
-                                            onNavigateToDetail(weather.location.name)
-                                        }
-                                    },
-                                    modifier = Modifier.padding(top = 16.dp)
-                                ) {
-                                    Text(
-                                        textAlign = TextAlign.Center,
-                                        text = stringResource(
-                                            R.string.view_detail,
-                                            weather.location?.name ?: ""
-                                        )
-                                    )
-                                }
-
-                            } else {
-                                Text(
-                                    textAlign = TextAlign.Center,
-                                    text = stringResource(R.string.no_weather_data_available)
-                                )
-                            }
-                        }
-                    }
-                }
-
-                is Result.Error -> {
+            is Result.Error -> {
                     val errorMessage =
                         result.exception.message ?: stringResource(R.string.an_unknown_error_occurred)
                     Text(
@@ -270,14 +174,14 @@ fun CurrentWeatherScreen(
                 null -> Unit
             }
 
-            Button(
+            // this button is manually fetch weather
+            /*Button(
                 onClick = { viewModel.retryFetchWeather() },
                 modifier = Modifier.padding(top = 16.dp),
                 enabled = locationPermissionGranted && locationEnabled
             ) {
                 Text(stringResource(R.string.fetch_weather))
-            }
-        }
+            }*/
     }
 }
 

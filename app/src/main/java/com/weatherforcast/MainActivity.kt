@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
 import com.weatherforcast.navigation.AppNavHost
 import com.weatherforcast.ui.theme.WeatherForcastTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -18,9 +19,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             WeatherForcastTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavHost()
-                }
+                AppNavHost()
             }
         }
     }
