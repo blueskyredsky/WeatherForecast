@@ -7,13 +7,11 @@ import com.common.R
 import com.common.model.ErrorType
 import com.common.model.Result
 import com.currentweather.data.model.currentweather.CurrentWeather
-import com.currentweather.data.repository.CurrentWeatherRepository
+import com.currentweather.data.repository.WeatherRepository
 import com.currentweather.data.repository.LocationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -23,7 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
-    private val currentWeatherRepository: CurrentWeatherRepository,
+    private val weatherRepository: WeatherRepository,
     private val locationRepository: LocationRepository
 ) : ViewModel() {
 
@@ -112,7 +110,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private fun fetchWeather(location: Location) {
         viewModelScope.launch {
             try {
-                val weather = currentWeatherRepository.fetchCurrentWeather(
+                val weather = weatherRepository.fetchCurrentWeather(
                     "${location.latitude},${location.longitude}"
                 )
                 _currentWeather.value = Result.Success(weather.getOrNull())

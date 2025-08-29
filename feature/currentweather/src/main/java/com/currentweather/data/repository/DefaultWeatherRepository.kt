@@ -9,10 +9,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class DefaultCurrentWeatherRepository @Inject constructor(
+class DefaultWeatherRepository @Inject constructor(
     private val apiService: ApiService,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
-) : CurrentWeatherRepository {
+) : WeatherRepository {
 
     override suspend fun fetchCurrentWeather(location: String): Result<CurrentWeather> =
         withContext(ioDispatcher) {
