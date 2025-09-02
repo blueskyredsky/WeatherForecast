@@ -1,8 +1,7 @@
 package com.currentweather.data.repository
 
-import ForecastDTO
 import com.currentweather.data.model.currentweather.CurrentWeather
-import retrofit2.Response
+import com.currentweather.data.model.forecast.Forecast
 
 /**
  * Repository interface for fetching forecast data.
@@ -13,8 +12,8 @@ interface WeatherRepository {
      */
     suspend fun fetchCurrentWeather(location: String): Result<CurrentWeather>
 
-    suspend fun fetchForecast(
-        location: String,
-        days: Int
-    ): Response<ForecastDTO>
+    /**
+     * Fetches the forecast for a given location and number of days.
+     */
+    suspend fun fetchForecast(location: String, days: Int): Result<Forecast>
 }

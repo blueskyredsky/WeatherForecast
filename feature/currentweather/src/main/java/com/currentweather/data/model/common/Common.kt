@@ -34,7 +34,7 @@ fun CurrentDTO.toCurrentResult(): Result<Current> {
             tempF = requiredTempF,
             uv = uv ?: 0.0,
             windDegree = windDegree ?: 0,
-            windDir = windDir ?: "",
+            windDir = windDir.orEmpty(),
             windKph = windKph ?: 0.0,
             windMph = windMph ?: 0.0,
             windchillC = windchillC ?: 0.0,
@@ -50,11 +50,11 @@ fun LocationDTO.toLocationResult(): Result<Location> {
                 ?: throw IllegalStateException("Country is a mandatory field and cannot be null"),
             lat = lat
                 ?: throw IllegalStateException("Latitude is a mandatory field and cannot be null"),
-            localtime = localtime ?: "",
+            localtime = localtime.orEmpty(),
             long = lon
                 ?: throw IllegalStateException("Longitude is a mandatory field and cannot be null"),
-            name = name ?: "",
-            region = region ?: "",
+            name = name.orEmpty(),
+            region = region.orEmpty(),
         )
     }
 }
@@ -62,7 +62,7 @@ fun LocationDTO.toLocationResult(): Result<Location> {
 fun ConditionDTO.toCondition(): Condition {
     return Condition(
         code = code ?: 0,
-        icon = icon ?: "",
-        text = text ?: ""
+        icon = icon.orEmpty(),
+        text = text.orEmpty()
     )
 }

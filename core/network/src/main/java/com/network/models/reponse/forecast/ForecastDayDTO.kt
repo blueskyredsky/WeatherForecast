@@ -8,7 +8,7 @@ data class ForecastDayDTO(
     @SerialName("date")
     val date: String?,
     @SerialName("date_epoch")
-    val dateEpoch: Long,
+    val dateEpoch: Long?,
     @SerialName("day")
     val day: DayDTO?,
     @SerialName("astro")

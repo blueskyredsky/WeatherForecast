@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.common.R
 import com.common.model.ErrorType
 import com.common.model.Result
+import com.common.model.error.RepositoryError
 import com.currentweather.data.model.currentweather.CurrentWeather
 import com.currentweather.data.repository.WeatherRepository
 import com.currentweather.data.repository.LocationRepository
@@ -109,14 +110,34 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     private fun fetchWeather(location: Location) {
         viewModelScope.launch {
-            try {
-                val weather = weatherRepository.fetchCurrentWeather(
-                    "${location.latitude},${location.longitude}"
-                )
-                _currentWeather.value = Result.Success(weather.getOrNull())
-            } catch (e: Exception) {
-                _currentWeather.value = Result.Error(e)
-            }
+            weatherRepository.fetchCurrentWeather("${location.latitude},${location.longitude}")
+                .onSuccess { weather ->
+                    _currentWeather.value = Result.Success(weather)
+                }
+                .onFailure { throwable ->
+                    when (throwable) {
+                        is RepositoryError.NetworkError -> {
+                            // Handle network specific errors, e.g., show a network error message
+                            _currentWeather.value = Result.Error(throwable)
+                        }
+                        is RepositoryError.NoDataError -> {
+                            // Handle cases where the response body was null
+                            _currentWeather.value = Result.Error(throwable)
+                        }
+                        is RepositoryError.MappingError -> {
+                            // Handle data mapping or deserialization errors
+                            _currentWeather.value = Result.Error(throwable)
+                        }
+                        is RepositoryError.UnknownError -> {
+                            // Handle any other unexpected exceptions
+                            _currentWeather.value = Result.Error(throwable)
+                        }
+                        else -> {
+                            // Catch any other unexpected Throwable
+                            _currentWeather.value = Result.Error(throwable)
+                        }
+                    }
+                }
         }
     }
 
