@@ -49,6 +49,7 @@ fun SuccessContent(
 ) {
     val view = LocalView.current
     val barColor = colorResource(weatherData.backgroundColorResource)
+    val color = colorResource(weatherData.textColorResource)
 
     SideEffect {
         val window = (view.context as Activity).window
@@ -86,33 +87,40 @@ fun SuccessContent(
 
                 Text(
                     text = stringResource(R.string.today),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    color = color
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "${weather.current?.tempC ?: ""}°",
+                    text = "${weather.current.tempC}°",
                     style = MaterialTheme.typography.displayLarge.copy(fontSize = 100.sp),
+                    color = color
                 )
 
                 Spacer(modifier = Modifier.height(100.dp))
 
-                weather.location?.name?.let { cityName ->
+                weather.location.name.let { cityName ->
                     Icon(
                         painter = painterResource(com.common.R.drawable.ic_loaction),
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = color
                     )
 
                     Text(
                         text = cityName,
-                        style = MaterialTheme.typography.displayLarge
+                        style = MaterialTheme.typography.displayLarge,
+                        color = color
                     )
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                ConnectedWavyLines(modifier = Modifier.padding(8.dp))
+                ConnectedWavyLines(
+                    modifier = Modifier.padding(8.dp),
+                    color = color
+                )
 
                 /*weather.current?.condition?.icon?.let { iconUrl ->
                     AsyncImage(
@@ -130,7 +138,7 @@ fun SuccessContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                weather.location?.name?.let { cityName ->
+                weather.location.name.let { cityName ->
                     Button(
                         onClick = { onNavigateToDetail(cityName) },
                         modifier = Modifier.fillMaxWidth()
@@ -156,7 +164,10 @@ fun SuccessContent(
 }
 
 @Composable
-private fun ConnectedWavyLines(modifier: Modifier = Modifier) {
+private fun ConnectedWavyLines(
+    modifier: Modifier = Modifier,
+    color: Color = Color.Black
+) {
     Canvas(
         modifier = modifier
             .fillMaxWidth()
@@ -198,13 +209,13 @@ private fun ConnectedWavyLines(modifier: Modifier = Modifier) {
         }
         drawPath(
             path = pathRight,
-            color = Color.Black,
+            color = color,
             style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
         )
 
         // Connecting Circle
         drawCircle(
-            color = Color.Black,
+            color = color,
             radius = circleRadius,
             center = Offset(centerX, centerY),
             style = Stroke(width = 2.dp.toPx())
@@ -212,7 +223,7 @@ private fun ConnectedWavyLines(modifier: Modifier = Modifier) {
 
         // Vertical Line
         drawLine(
-            color = Color.Black,
+            color = color,
             start = Offset(centerX, centerY + circleRadius),
             end = Offset(centerX, centerY + circleRadius + 32.dp.toPx()),
             strokeWidth = 2.dp.toPx(),
