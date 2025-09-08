@@ -35,6 +35,7 @@ fun CurrentWeatherScreen(
     viewModel: CurrentWeatherViewModel
 ) {
     val currentWeather by viewModel.currentWeather.collectAsStateWithLifecycle()
+    val hourlyForecast by viewModel.hourlyForecast.collectAsStateWithLifecycle()
     val locationPermissionGranted by viewModel.locationPermissionGranted.collectAsStateWithLifecycle()
     val locationEnabled by viewModel.locationEnabled.collectAsStateWithLifecycle()
     val requestLocationPermissions by viewModel.requestLocationPermissions.collectAsStateWithLifecycle()
@@ -183,14 +184,4 @@ fun CurrentWeatherScreen(
                 Text(stringResource(R.string.fetch_weather))
             }*/
     }
-}
-
-@Composable
-fun ErrorContent(modifier: Modifier = Modifier) {
-
-}
-
-@Composable
-fun CurrentWeatherContent(modifier: Modifier = Modifier) {
-
 }
