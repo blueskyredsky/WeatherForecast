@@ -15,6 +15,7 @@ import com.currentweather.data.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -34,7 +35,7 @@ class CurrentWeatherViewModel @Inject constructor(
 
     private var hasFetchedCurrentWeather = false
 
-    private val _weatherUIState = MutableStateFlow(WeatherUIState(isLoading = true))
+    private val _weatherUIState = MutableStateFlow<WeatherUIState>(WeatherUIState.Idle)
     val weatherUIState = _weatherUIState.asStateFlow()
 
     private val _locationPermissionGranted = MutableStateFlow(false)
@@ -50,8 +51,8 @@ class CurrentWeatherViewModel @Inject constructor(
         _locationPermissionGranted.value = locationRepository.hasLocationPermissions()
         if (!locationPermissionGranted.value) {
             _requestLocationPermissions.value = true
-            _weatherUIState.value = WeatherUIState(isLoading = false)
-            _currentWeather.value = Result.Error(Exception("Location permissions denied."), ErrorType.LOCATION_PERMISSIONS_DENIED)
+            _weatherUIState.value =
+                WeatherUIState.Error(errorType = ErrorType.LocationPermissionDenied)
         }
     }
 
@@ -59,7 +60,8 @@ class CurrentWeatherViewModel @Inject constructor(
         locationRepository.isLocationEnabled()
             .onEach { isEnabled ->
                 if (!isEnabled) {
-                    _currentWeather.value = Result.Error(Exception("Location services are disabled."), ErrorType.LOCATION_SERVICES_DISABLED)
+                    _weatherUIState.value =
+                        WeatherUIState.Error(errorType = ErrorType.LocationServicesDisabled)
                 }
                 _locationEnabled.value = isEnabled
             }
@@ -78,30 +80,28 @@ class CurrentWeatherViewModel @Inject constructor(
 
     @Suppress("UNCHECKED_CAST")
     private fun fetchWeatherOnLocation() {
-        if (_weatherUIState.value.isLoading) return
+        if (_weatherUIState.value is WeatherUIState.Loading) return
 
-        _weatherUIState.value = WeatherUIState(isLoading = true)
+        _weatherUIState.value = WeatherUIState.Loading
 
         viewModelScope.launch {
             try {
-                locationRepository.getLocationUpdates().first().let { location ->
-                    val locationString = "${location.latitude},${location.longitude}"
+                val location = locationRepository.getLocationUpdates().first()
+                val locationString = "${location.latitude},${location.longitude}"
 
-                    val (currentWeatherResult, forecastResult) = awaitAll(
-                        async { weatherRepository.fetchCurrentWeather(locationString) },
+                val (currentWeatherResult, forecastResult) = coroutineScope {
+                    val currentWeatherDeferred =
+                        async { weatherRepository.fetchCurrentWeather(locationString) }
+                    val forecastDeferred =
                         async { weatherRepository.fetchForecast(locationString, 1) }
-                    )
 
-                    val currentWeather = (currentWeatherResult as? kotlin.Result<CurrentWeather>)?.getOrThrow()
-                    val forecast = (forecastResult as? kotlin.Result<Forecast>)?.getOrThrow()
-
-                    // Update the UI state with success data
-                    _weatherUIState.value = WeatherUIState(
-                        currentWeather = currentWeather,
-                        hourlyForecast = forecast,
-                        isLoading = false
-                    )
+                    currentWeatherDeferred.await() to forecastDeferred.await()
                 }
+
+                _weatherUIState.value = WeatherUIState.Success(
+                    currentWeather = currentWeatherResult.getOrNull(),
+                    hourlyForecast = forecastResult.getOrNull()
+                )
             } catch (e: Exception) {
                 val errorType = when (e) {
                     is RepositoryError.NetworkError -> ErrorType.NetworkError
@@ -109,7 +109,7 @@ class CurrentWeatherViewModel @Inject constructor(
                     is RepositoryError.MappingError -> ErrorType.MappingError
                     else -> ErrorType.UnknownError
                 }
-                _weatherUIState.value = WeatherUIState(errorType = errorType)
+                _weatherUIState.value = WeatherUIState.Error(errorType = errorType)
             }
         }
     }
@@ -124,7 +124,7 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     fun retryFetchWeather() {
-        _weatherUIState.value = null
+        _weatherUIState.value = WeatherUIState.Idle
         hasFetchedCurrentWeather = false
         fetchWeatherOnLocation()
     }
@@ -154,15 +154,44 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 }
 
+/**
+ * Represents the UI elements for displaying weather information.
+ *
+ * @property backgroundImageResource The resource ID for the background image.
+ * @property backgroundColorResource The resource ID for the background color.
+ * @property textColorResource The resource ID for the text color.
+ */
 data class WeatherUI(
     @DrawableRes val backgroundImageResource: Int,
     @ColorRes val backgroundColorResource: Int,
     @ColorRes val textColorResource: Int = R.color.black
 )
 
-data class WeatherUIState(
-    val currentWeather: CurrentWeather? = null,
-    val hourlyForecast: Forecast? = null,
-    val isLoading: Boolean = false,
-    val errorType: ErrorType? = null,
-)
+/**
+ * Represents the different states of the weather UI.
+ */
+sealed interface WeatherUIState {
+    /**
+     * Represents the idle state of the UI.
+     */
+    data object Idle : WeatherUIState
+    /**
+     * Represents the loading state of the UI.
+     */
+    data object Loading : WeatherUIState
+    /**
+     * Represents the success state of the UI, containing current weather and forecast data.
+     * @param currentWeather The current weather information.
+     * @param hourlyForecast The hourly forecast information.
+     */
+    data class Success(
+        val currentWeather: CurrentWeather?,
+        val hourlyForecast: Forecast?
+    ) : WeatherUIState
+
+    /**
+     * Represents the error state of the UI.
+     * @param errorType The type of error that occurred.
+     */
+    data class Error(val errorType: ErrorType) : WeatherUIState
+}
