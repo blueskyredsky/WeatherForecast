@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ForecastDataDTO(
     @SerialName("forecastday")
-    val forecastDay: List<ForecastDayDTO?>?,
+    val forecastDay: List<ForecastDayDTO?>? = null,
 )

@@ -53,11 +53,11 @@ object NetworkModule {
     @Singleton
     fun provideJson(): Json {
         return Json {
-            // This is the key setting to prevent the MissingFieldException
             ignoreUnknownKeys = true
-            // Other configurations you might need
             isLenient = true
             prettyPrint = true
+            coerceInputValues = true
+            encodeDefaults = false
         }
     }
 

@@ -6,13 +6,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ForecastDayDTO(
     @SerialName("date")
-    val date: String?,
+    val date: String? = null,
     @SerialName("date_epoch")
-    val dateEpoch: Long?,
+    val dateEpoch: Long? = null,
     @SerialName("day")
-    val day: DayDTO?,
+    val day: DayDTO? = null,
     @SerialName("astro")
-    val astro: AstroDTO?,
+    val astro: AstroDTO? = null,
     @SerialName("hour")
-    val hour: List<HourDTO?>?,
+    val hour: List<HourDTO?>? = null,
 )

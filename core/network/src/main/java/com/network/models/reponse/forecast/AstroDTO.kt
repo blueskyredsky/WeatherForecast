@@ -6,19 +6,19 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AstroDTO(
     @SerialName("sunrise")
-    val sunrise: String?,
+    val sunrise: String? = null,
     @SerialName("sunset")
-    val sunset: String?,
+    val sunset: String? = null,
     @SerialName("moonrise")
-    val moonrise: String?,
+    val moonrise: String? = null,
     @SerialName("moonset")
-    val moonset: String?,
+    val moonset: String? = null,
     @SerialName("moon_phase")
-    val moonPhase: String?,
+    val moonPhase: String? = null,
     @SerialName("moon_illumination")
-    val moonIllumination: Int?,
+    val moonIllumination: Int? = null,
     @SerialName("is_moon_up")
-    val isMoonUp: Int?,
+    val isMoonUp: Int? = null,
     @SerialName("is_sun_up")
-    val isSunUp: Int?,
+    val isSunUp: Int? = null,
 )

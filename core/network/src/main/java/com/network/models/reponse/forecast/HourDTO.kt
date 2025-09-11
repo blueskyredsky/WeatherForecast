@@ -7,73 +7,73 @@ import com.network.models.reponse.currentweather.ConditionDTO
 @Serializable
 data class HourDTO(
     @SerialName("time_epoch")
-    val timeEpoch: Long?,
+    val timeEpoch: Long? = null,
     @SerialName("time")
-    val time: String?,
+    val time: String? = null,
     @SerialName("temp_c")
-    val tempC: Double?,
+    val tempC: Double? = null,
     @SerialName("temp_f")
-    val tempF: Double?,
+    val tempF: Double? = null,
     @SerialName("is_day")
-    val isDay: Int?,
+    val isDay: Int? = null,
     @SerialName("condition")
-    val condition: ConditionDTO?,
+    val condition: ConditionDTO? = null,
     @SerialName("wind_mph")
-    val windMph: Double?,
+    val windMph: Double? = null,
     @SerialName("wind_kph")
-    val windKph: Double?,
+    val windKph: Double? = null,
     @SerialName("wind_degree")
-    val windDegree: Int?,
+    val windDegree: Int? = null,
     @SerialName("wind_dir")
-    val windDir: String?,
+    val windDir: String? = null,
     @SerialName("pressure_mb")
-    val pressureMb: Double?,
+    val pressureMb: Double? = null,
     @SerialName("pressure_in")
-    val pressureIn: Double?,
+    val pressureIn: Double? = null,
     @SerialName("precip_mm")
-    val precipitationMm: Double?,
+    val precipitationMm: Double? = null,
     @SerialName("precip_in")
-    val precipitationIn: Double?,
+    val precipitationIn: Double? = null,
     @SerialName("snow_cm")
-    val snowCm: Double?,
+    val snowCm: Double? = null,
     @SerialName("snow_in")
-    val snowIn: Double?,
+    val snowIn: Double? = null,
     @SerialName("humidity")
-    val humidity: Int?,
+    val humidity: Int? = null,
     @SerialName("cloud")
-    val cloud: Int?,
+    val cloud: Int? = null,
     @SerialName("feelslike_c")
-    val feelsLikeC: Double?,
+    val feelsLikeC: Double? = null,
     @SerialName("feelslike_f")
-    val feelsLikeF: Double?,
+    val feelsLikeF: Double? = null,
     @SerialName("windchill_c")
-    val windchillC: Double?,
+    val windchillC: Double? = null,
     @SerialName("windchill_f")
-    val windchillF: Double?,
+    val windchillF: Double? = null,
     @SerialName("heatindex_c")
-    val heatIndexC: Double?,
+    val heatIndexC: Double? = null,
     @SerialName("heatindex_f")
-    val heatIndexF: Double?,
+    val heatIndexF: Double? = null,
     @SerialName("dewpoint_c")
-    val dewPointC: Double?,
+    val dewPointC: Double? = null,
     @SerialName("dewpoint_f")
-    val dewPointF: Double?,
+    val dewPointF: Double? = null,
     @SerialName("will_it_rain")
-    val willItRain: Int?,
+    val willItRain: Int? = null,
     @SerialName("chance_of_rain")
-    val chanceOfRain: Int?,
+    val chanceOfRain: Int? = null,
     @SerialName("will_it_snow")
-    val willItSnow: Int?,
+    val willItSnow: Int? = null,
     @SerialName("chance_of_snow")
-    val chanceOfSnow: Int?,
+    val chanceOfSnow: Int? = null,
     @SerialName("vis_km")
-    val visKm: Double?,
+    val visKm: Double? = null,
     @SerialName("vis_miles")
-    val visMiles: Double?,
+    val visMiles: Double? = null,
     @SerialName("gust_mph")
-    val gustMph: Double?,
+    val gustMph: Double? = null,
     @SerialName("gust_kph")
-    val gustKph: Double?,
+    val gustKph: Double? = null,
     @SerialName("uv")
-    val uv: Double?,
+    val uv: Double? = null,
 )

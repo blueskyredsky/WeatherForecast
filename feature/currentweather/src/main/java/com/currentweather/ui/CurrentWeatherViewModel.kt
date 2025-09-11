@@ -89,18 +89,18 @@ class CurrentWeatherViewModel @Inject constructor(
                 val location = locationRepository.getLocationUpdates().first()
                 val locationString = "${location.latitude},${location.longitude}"
 
-                val (currentWeatherResult, forecastResult) = coroutineScope {
+                val (currentWeather, forecast) = coroutineScope {
                     val currentWeatherDeferred =
                         async { weatherRepository.fetchCurrentWeather(locationString) }
                     val forecastDeferred =
                         async { weatherRepository.fetchForecast(locationString, 1) }
 
-                    currentWeatherDeferred.await() to forecastDeferred.await()
+                    currentWeatherDeferred.await().getOrThrow() to forecastDeferred.await().getOrThrow()
                 }
 
                 _weatherUIState.value = WeatherUIState.Success(
-                    currentWeather = currentWeatherResult.getOrNull(),
-                    hourlyForecast = forecastResult.getOrNull()
+                    currentWeather = currentWeather,
+                    hourlyForecast = forecast
                 )
             } catch (e: Exception) {
                 val errorType = when (e) {

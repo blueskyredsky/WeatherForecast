@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ConditionDTO(
-    @SerialName("code") val code: Int?,
-    @SerialName("icon") val icon: String?,
-    @SerialName("text") val text: String?
+    @SerialName("code") val code: Int? = null,
+    @SerialName("icon") val icon: String? = null,
+    @SerialName("text") val text: String? = null
 )

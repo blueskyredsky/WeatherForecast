@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CurrentWeatherDTO(
-    @SerialName("current") val currentDTO: CurrentDTO?,
-    @SerialName("location") val locationDTO: LocationDTO?
+    @SerialName("current") val currentDTO: CurrentDTO? = null,
+    @SerialName("location") val locationDTO: LocationDTO? = null
 )

@@ -7,43 +7,43 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DayDTO(
     @SerialName("maxtemp_c")
-    val maxTempC: Double?,
+    val maxTempC: Double? = null,
     @SerialName("maxtemp_f")
-    val maxTempF: Double?,
+    val maxTempF: Double? = null,
     @SerialName("mintemp_c")
-    val minTempC: Double?,
+    val minTempC: Double? = null,
     @SerialName("mintemp_f")
-    val minTempF: Double?,
+    val minTempF: Double? = null,
     @SerialName("avgtemp_c")
-    val avgTempC: Double?,
+    val avgTempC: Double? = null,
     @SerialName("avgtemp_f")
-    val avgTempF: Double?,
+    val avgTempF: Double? = null,
     @SerialName("maxwind_mph")
-    val maxWindMph: Double?,
+    val maxWindMph: Double? = null,
     @SerialName("maxwind_kph")
-    val maxWindKph: Double?,
+    val maxWindKph: Double? = null,
     @SerialName("totalprecip_mm")
-    val totalPrecipitationMm: Double?,
+    val totalPrecipitationMm: Double? = null,
     @SerialName("totalprecip_in")
-    val totalPrecipitationIn: Double?,
+    val totalPrecipitationIn: Double? = null,
     @SerialName("totalsnow_cm")
-    val totalSnowCm: Double?,
+    val totalSnowCm: Double? = null,
     @SerialName("avgvis_km")
-    val avgVisKm: Double?,
+    val avgVisKm: Double? = null,
     @SerialName("avgvis_miles")
-    val avgVisMiles: Double?,
+    val avgVisMiles: Double? = null,
     @SerialName("avghumidity")
-    val avgHumidity: Int?,
+    val avgHumidity: Int? = null,
     @SerialName("daily_will_it_rain")
-    val dailyWillItRain: Int?,
+    val dailyWillItRain: Int? = null,
     @SerialName("daily_chance_of_rain")
-    val dailyChanceOfRain: Int?,
+    val dailyChanceOfRain: Int? = null,
     @SerialName("daily_will_it_snow")
-    val dailyWillItSnow: Int?,
+    val dailyWillItSnow: Int? = null,
     @SerialName("daily_chance_of_snow")
-    val dailyChanceOfSnow: Int?,
+    val dailyChanceOfSnow: Int? = null,
     @SerialName("condition")
-    val condition: ConditionDTO?,
+    val condition: ConditionDTO? = null,
     @SerialName("uv")
-    val uv: Double?
+    val uv: Double? = null
 )
