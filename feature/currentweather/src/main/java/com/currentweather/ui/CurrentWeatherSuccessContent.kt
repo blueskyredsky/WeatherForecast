@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -18,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,12 +43,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import coil.compose.AsyncImage
+import com.common.model.extension.toFormattedTime
 import com.currentweather.R
 import com.currentweather.data.model.currentweather.CurrentWeather
+import com.currentweather.data.model.forecast.Forecast
+import java.util.Calendar
 
 @Composable
 fun SuccessContent(
     currentWeather: CurrentWeather?,
+    forecast: Forecast?,
     weatherData: WeatherUI,
     modifier: Modifier = Modifier,
     onNavigateToDetail: (cityName: String) -> Unit
@@ -122,19 +133,33 @@ fun SuccessContent(
                     color = color
                 )
 
-                /*weather.current?.condition?.icon?.let { iconUrl ->
-                    AsyncImage(
-                        model = "https:$iconUrl",
-                        contentDescription = stringResource(R.string.weather_condition_icon),
-                        modifier = Modifier.size(64.dp)
-                    )
-                }
+                Spacer(modifier = Modifier.height(40.dp))
 
-                Text(
-                    textAlign = TextAlign.Center,
-                    text = weather.current?.condition?.text.orEmpty(),
-                    style = MaterialTheme.typography.bodyLarge
-                )*/
+                forecast?.forecast?.forecastDay?.first()?.hour?.let { hours ->
+                    val listState = rememberLazyListState()
+
+                    LazyRow(state = listState) {
+                        items(hours) {
+                            ItemHourlyForecast(
+                                iconUrl = it.condition.icon,
+                                temperature = it.tempC.toString(),
+                                time = it.time,
+                                color = color
+                            )
+                        }
+                    }
+
+                    // todo optimise this
+                    LaunchedEffect(key1 = hours) {
+                        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+                        val targetIndex = hours.indexOfFirst {
+                            it.time.substringAfter(" ").substringBefore(":").toInt() == currentHour
+                        }
+                        if (targetIndex != -1) {
+                            listState.scrollToItem(targetIndex)
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -228,6 +253,37 @@ private fun ConnectedWavyLines(
             end = Offset(centerX, centerY + circleRadius + 32.dp.toPx()),
             strokeWidth = 2.dp.toPx(),
             cap = StrokeCap.Round
+        )
+    }
+}
+
+@Composable
+private fun ItemHourlyForecast(
+    iconUrl: String,
+    temperature: String,
+    time: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = time.toFormattedTime(),
+            style = MaterialTheme.typography.titleSmall,
+            color = color
+        )
+        AsyncImage(
+            model = "https:$iconUrl",
+            contentDescription = stringResource(R.string.weather_condition_icon),
+            modifier = Modifier.size(32.dp)
+        )
+        Text(
+            text = "$temperature°",
+            style = MaterialTheme.typography.titleSmall,
+            color = color
         )
     }
 }

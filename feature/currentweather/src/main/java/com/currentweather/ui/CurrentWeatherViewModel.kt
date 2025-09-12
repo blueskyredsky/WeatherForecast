@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.common.R
 import com.common.model.ErrorType
-import com.common.model.Result
 import com.common.model.error.RepositoryError
 import com.currentweather.data.model.currentweather.CurrentWeather
 import com.currentweather.data.model.forecast.Forecast
@@ -14,7 +13,6 @@ import com.currentweather.data.repository.LocationRepository
 import com.currentweather.data.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +23,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.getOrThrow
-import kotlin.onFailure
 
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
@@ -100,7 +97,7 @@ class CurrentWeatherViewModel @Inject constructor(
 
                 _weatherUIState.value = WeatherUIState.Success(
                     currentWeather = currentWeather,
-                    hourlyForecast = forecast
+                    forecast = forecast
                 )
             } catch (e: Exception) {
                 val errorType = when (e) {
@@ -182,11 +179,11 @@ sealed interface WeatherUIState {
     /**
      * Represents the success state of the UI, containing current weather and forecast data.
      * @param currentWeather The current weather information.
-     * @param hourlyForecast The hourly forecast information.
+     * @param forecast The forecast information.
      */
     data class Success(
         val currentWeather: CurrentWeather?,
-        val hourlyForecast: Forecast?
+        val forecast: Forecast?
     ) : WeatherUIState
 
     /**
