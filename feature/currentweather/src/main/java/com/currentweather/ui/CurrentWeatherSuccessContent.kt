@@ -1,7 +1,6 @@
 package com.currentweather.ui
 
 import android.app.Activity
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,12 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
@@ -48,6 +42,7 @@ import com.common.model.extension.toFormattedTime
 import com.currentweather.R
 import com.currentweather.data.model.currentweather.CurrentWeather
 import com.currentweather.data.model.forecast.Forecast
+import com.currentweather.ui.component.ConnectedWavyLines
 import java.util.Calendar
 
 @Composable
@@ -129,17 +124,14 @@ fun SuccessContent(
                 Spacer(modifier = Modifier.height(40.dp))
 
                 ConnectedWavyLines(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(horizontal = 8.dp),
                     color = color
                 )
 
-                Spacer(modifier = Modifier.height(40.dp))
-
                 forecast?.forecast?.forecastDay?.first()?.hour?.let { hours ->
                     val listState = rememberLazyListState()
-
                     LazyRow(state = listState) {
-                        items(hours) {
+                        items(hours, key = { it.time.hashCode() }) {
                             ItemHourlyForecast(
                                 iconUrl = it.condition.icon,
                                 temperature = it.tempC.toString(),
@@ -149,14 +141,13 @@ fun SuccessContent(
                         }
                     }
 
-                    // todo optimise this
                     LaunchedEffect(key1 = hours) {
                         val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
                         val targetIndex = hours.indexOfFirst {
                             it.time.substringAfter(" ").substringBefore(":").toInt() == currentHour
                         }
                         if (targetIndex != -1) {
-                            listState.scrollToItem(targetIndex)
+                            listState.scrollToItem(targetIndex) // scroll to current time
                         }
                     }
                 }
@@ -185,75 +176,6 @@ fun SuccessContent(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun ConnectedWavyLines(
-    modifier: Modifier = Modifier,
-    color: Color = Color.Black
-) {
-    Canvas(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(150.dp)
-    ) {
-        val width = size.width
-        val height = size.height
-        val centerX = width * 0.5f
-        val centerY = height * 0.5f
-        val circleRadius = 8.dp.toPx()
-        val lineGap = 2.dp.toPx()
-
-        val lineEndLeft = centerX - circleRadius - lineGap
-        val lineStartRight = centerX + circleRadius + lineGap
-
-        // Left Wavy Line with Gradient
-        val pathLeft = Path().apply {
-            moveTo(0f, centerY)
-            quadraticTo(width * 0.2f, centerY * 0.7f, lineEndLeft, centerY)
-        }
-        drawPath(
-            path = pathLeft,
-            brush = Brush.horizontalGradient(
-                colors = listOf(Color.LightGray, Color.DarkGray),
-                startX = 0f,
-                endX = lineEndLeft
-            ),
-            style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
-        )
-
-        // Right Wavy Line
-        val pathRight = Path().apply {
-            moveTo(lineStartRight, centerY)
-            cubicTo(
-                width * 0.6f, centerY * 1.25f,
-                width * 0.8f, centerY * 0.75f,
-                width, centerY
-            )
-        }
-        drawPath(
-            path = pathRight,
-            color = color,
-            style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
-        )
-
-        // Connecting Circle
-        drawCircle(
-            color = color,
-            radius = circleRadius,
-            center = Offset(centerX, centerY),
-            style = Stroke(width = 2.dp.toPx())
-        )
-
-        // Vertical Line
-        drawLine(
-            color = color,
-            start = Offset(centerX, centerY + circleRadius),
-            end = Offset(centerX, centerY + circleRadius + 32.dp.toPx()),
-            strokeWidth = 2.dp.toPx(),
-            cap = StrokeCap.Round
-        )
     }
 }
 
