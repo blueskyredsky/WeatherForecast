@@ -6,6 +6,7 @@ import com.reza.threading.common.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class DefaultLocationRepository @Inject constructor(
@@ -16,8 +17,8 @@ class DefaultLocationRepository @Inject constructor(
         return locationProvider.getLocationUpdates().flowOn(ioDispatcher)
     }
 
-    override suspend fun getLastKnownLocation(): Location? {
-        return locationProvider.getLastKnownLocation()
+    override suspend fun getLastKnownLocation(): Location? = withContext(ioDispatcher) {
+        locationProvider.getLastKnownLocation()
     }
 
     override fun isLocationEnabled(): Flow<Boolean> {

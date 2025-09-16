@@ -35,6 +35,9 @@ class CurrentWeatherViewModel @Inject constructor(
     private val _weatherUIState = MutableStateFlow<WeatherUIState>(WeatherUIState.Idle)
     val weatherUIState = _weatherUIState.asStateFlow()
 
+    private val _weatherUIData = MutableStateFlow(getWeatherUI(""))
+    val weatherUIData = _weatherUIData.asStateFlow()
+
     private val _locationPermissionGranted = MutableStateFlow(false)
     val locationPermissionGranted = _locationPermissionGranted.asStateFlow()
 
@@ -99,6 +102,8 @@ class CurrentWeatherViewModel @Inject constructor(
                     currentWeather = currentWeather,
                     forecast = forecast
                 )
+
+                _weatherUIData.value = getWeatherUI(currentWeather.current.condition.text)
             } catch (e: Exception) {
                 val errorType = when (e) {
                     is RepositoryError.NetworkError -> ErrorType.NetworkError
@@ -126,7 +131,7 @@ class CurrentWeatherViewModel @Inject constructor(
         fetchWeatherOnLocation()
     }
 
-    fun getWeatherUI(text: String): WeatherUI {
+    private fun getWeatherUI(text: String): WeatherUI {
         return when {
             text.lowercase().contains("sun") -> WeatherUI(
                 backgroundImageResource = R.drawable.ic_sunny,

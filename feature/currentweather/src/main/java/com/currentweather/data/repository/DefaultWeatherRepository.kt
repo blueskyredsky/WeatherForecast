@@ -23,18 +23,16 @@ class DefaultWeatherRepository @Inject constructor(
                 apiService.fetchCurrentWeather(location).let { response ->
                     if (response.isSuccessful) {
                         response.body()?.let { body ->
-                            val conversionResult: Result<CurrentWeather> =
-                                body.toCurrentWeatherResult().fold(
-                                    onSuccess = { currentWeather -> Result.success(currentWeather) },
-                                    onFailure = { throwable ->
-                                        Result.failure(
-                                            RepositoryError.MappingError(
-                                                throwable
-                                            )
+                            body.toCurrentWeatherResult().fold(
+                                onSuccess = { currentWeather -> Result.success(currentWeather) },
+                                onFailure = { throwable ->
+                                    Result.failure(
+                                        RepositoryError.MappingError(
+                                            throwable
                                         )
-                                    }
-                                )
-                            conversionResult
+                                    )
+                                }
+                            )
                         } ?: Result.failure(RepositoryError.NoDataError("Response body is null"))
                     } else {
                         Result.failure(

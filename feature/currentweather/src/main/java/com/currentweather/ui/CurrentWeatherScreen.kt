@@ -4,12 +4,14 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,6 +21,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +39,7 @@ fun CurrentWeatherScreen(
     viewModel: CurrentWeatherViewModel
 ) {
     val weatherUIState by viewModel.weatherUIState.collectAsStateWithLifecycle()
+    val weatherUIData by viewModel.weatherUIData.collectAsStateWithLifecycle()
     val locationPermissionGranted by viewModel.locationPermissionGranted.collectAsStateWithLifecycle()
     val locationEnabled by viewModel.locationEnabled.collectAsStateWithLifecycle()
     val requestLocationPermissions by viewModel.requestLocationPermissions.collectAsStateWithLifecycle()
@@ -48,6 +52,8 @@ fun CurrentWeatherScreen(
             Manifest.permission.ACCESS_FINE_LOCATION
         )
     )
+
+    val appBarColor = colorResource(id = weatherUIData.backgroundColorResource)
 
     LaunchedEffect(Unit) {
         viewModel.startObservingLocationAndWeather()
@@ -71,15 +77,19 @@ fun CurrentWeatherScreen(
 
     Scaffold(
         topBar = {
-            CustomSearchBar(
-                query = query,
-                onQueryChange = { query = it },
-                onSearch = {  },
-                searchResults = listOf("1", "2", "3"),
-                onResultClick = {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .background(appBarColor)) {
+                CustomSearchBar(
+                    query = query,
+                    onQueryChange = { query = it },
+                    onSearch = { },
+                    searchResults = listOf("1", "2", "3"),
+                    onResultClick = {
 
-                }
-            )
+                    }
+                )
+            }
         },
         snackbarHost = {
             // todo to be completed
@@ -174,17 +184,20 @@ fun CurrentWeatherScreen(
             }
 
             WeatherUIState.Idle -> Unit
-            WeatherUIState.Loading -> LoadingContent(modifier = Modifier
-                .padding(paddingValues = innerPadding)
-                .fillMaxSize())
+            WeatherUIState.Loading -> {
+                LoadingContent(
+                    modifier = Modifier
+                        .padding(paddingValues = innerPadding)
+                        .fillMaxSize()
+                )
+            }
+
             is WeatherUIState.Success ->
                 SuccessContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding),
-                    weatherData = viewModel.getWeatherUI(
-                        result.currentWeather?.current?.condition?.text ?: ""
-                    ),
+                    weatherData = weatherUIData,
                     forecast = result.forecast,
                     currentWeather = result.currentWeather,
                     onNavigateToDetail = onNavigateToDetail
