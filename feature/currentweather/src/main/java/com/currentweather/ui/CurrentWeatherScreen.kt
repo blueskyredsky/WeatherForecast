@@ -40,6 +40,7 @@ fun CurrentWeatherScreen(
 ) {
     val weatherUIState by viewModel.weatherUIState.collectAsStateWithLifecycle()
     val weatherUIData by viewModel.weatherUIData.collectAsStateWithLifecycle()
+    val searchLocation by viewModel.searchLocation.collectAsStateWithLifecycle()
     val locationPermissionGranted by viewModel.locationPermissionGranted.collectAsStateWithLifecycle()
     val locationEnabled by viewModel.locationEnabled.collectAsStateWithLifecycle()
     val requestLocationPermissions by viewModel.requestLocationPermissions.collectAsStateWithLifecycle()
@@ -56,7 +57,7 @@ fun CurrentWeatherScreen(
     val appBarColor = colorResource(id = weatherUIData.backgroundColorResource)
 
     LaunchedEffect(Unit) {
-        viewModel.startObservingLocationAndWeather()
+        viewModel.startLocationWeatherUpdates()
     }
 
     LaunchedEffect(requestLocationPermissions) {
@@ -72,18 +73,15 @@ fun CurrentWeatherScreen(
         }
     }
 
-    // todo should be placed in vm
-    var query by rememberSaveable { mutableStateOf("") }
-
     Scaffold(
         topBar = {
             Box(modifier = Modifier
                 .fillMaxWidth()
                 .background(appBarColor)) {
                 CustomSearchBar(
-                    query = query,
-                    onQueryChange = { query = it },
-                    onSearch = { },
+                    query = searchLocation,
+                    onQueryChange = viewModel::searchLocation,
+                    onSearch = viewModel::updateSearchLocation,
                     searchResults = listOf("1", "2", "3"),
                     onResultClick = {
 

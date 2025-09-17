@@ -27,7 +27,24 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
-
+/**
+ * A custom search bar composable that allows for text input and displays search results.
+ *
+ * This composable provides a flexible search bar implementation with options for customization,
+ * including placeholders, leading/trailing icons, and supporting content for search results.
+ *
+ * @param query The current search query string.
+ * @param onQueryChange Callback invoked when the search query changes.
+ * @param onSearch Callback invoked when a search is initiated (e.g., by pressing enter).
+ * @param searchResults A list of strings representing the search results.
+ * @param onResultClick Callback invoked when a search result is clicked.
+ * @param modifier Optional [Modifier] for the search bar.
+ * @param placeholder Optional composable function to display as a placeholder in the input field.
+ * @param leadingIcon Optional composable function to display as a leading icon in the input field.
+ * @param trailingIcon Optional composable function to display as a trailing icon in the input field.
+ * @param supportingContent Optional composable function to display supporting content for each search result. It receives the result string as a parameter.
+ * @param leadingContent Optional composable function to display leading content for each search result.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CustomSearchBar(

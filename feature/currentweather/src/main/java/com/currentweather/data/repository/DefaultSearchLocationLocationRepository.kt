@@ -1,8 +1,6 @@
 package com.currentweather.data.repository
 
 import com.common.model.error.RepositoryError
-import com.currentweather.data.model.currentweather.CurrentWeather
-import com.currentweather.data.model.currentweather.toCurrentWeatherResult
 import com.currentweather.data.model.search.Search
 import com.currentweather.data.model.search.toListSearch
 import com.network.ApiService
@@ -11,10 +9,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class DefaultSearchLocationRepository @Inject constructor(
+class DefaultSearchLocationLocationRepository @Inject constructor(
     private val apiService: ApiService,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
-) : SearchRepository {
+) : SearchLocationRepository {
 
     override suspend fun searchLocation(cityName: String): Result<List<Search>> =
         withContext(ioDispatcher) {

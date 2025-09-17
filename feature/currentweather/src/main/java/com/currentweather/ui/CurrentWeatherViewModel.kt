@@ -10,6 +10,7 @@ import com.common.model.error.RepositoryError
 import com.currentweather.data.model.currentweather.CurrentWeather
 import com.currentweather.data.model.forecast.Forecast
 import com.currentweather.data.repository.LocationRepository
+import com.currentweather.data.repository.SearchLocationRepository
 import com.currentweather.data.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -27,7 +28,8 @@ import kotlin.getOrThrow
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val searchLocationRepository: SearchLocationRepository,
 ) : ViewModel() {
 
     private var hasFetchedCurrentWeather = false
@@ -38,6 +40,9 @@ class CurrentWeatherViewModel @Inject constructor(
     private val _weatherUIData = MutableStateFlow(getWeatherUI(""))
     val weatherUIData = _weatherUIData.asStateFlow()
 
+    private val _searchLocation = MutableStateFlow("")
+    val searchLocation = _searchLocation.asStateFlow()
+
     private val _locationPermissionGranted = MutableStateFlow(false)
     val locationPermissionGranted = _locationPermissionGranted.asStateFlow()
 
@@ -47,26 +52,43 @@ class CurrentWeatherViewModel @Inject constructor(
     private val _requestLocationPermissions = MutableStateFlow(false)
     val requestLocationPermissions = _requestLocationPermissions.asStateFlow()
 
-    fun checkLocationPermission() {
-        _locationPermissionGranted.value = locationRepository.hasLocationPermissions()
-        if (!locationPermissionGranted.value) {
+    fun updateSearchLocation(cityName: String) {
+        _searchLocation.value = cityName
+    }
+
+    fun searchLocation(cityName: String) {
+        viewModelScope.launch {
+            searchLocationRepository.searchLocation(cityName).onSuccess {
+                _searchLocation.value = it.toString()
+            }.onFailure {
+                _searchLocation.value = it.toString()
+            }
+        }
+    }
+
+    private fun checkLocationPermission() {
+        val hasPermission = locationRepository.hasLocationPermissions()
+        _locationPermissionGranted.value = hasPermission
+        if (!hasPermission) {
             _requestLocationPermissions.value = true
             _weatherUIState.value =
                 WeatherUIState.Error(errorType = ErrorType.LocationPermissionDenied)
         }
     }
 
-    fun startObservingLocationAndWeather() {
+    private fun trackLocationEnabledStatus() {
         locationRepository.isLocationEnabled()
             .onEach { isEnabled ->
+                _locationEnabled.value = isEnabled
                 if (!isEnabled) {
                     _weatherUIState.value =
                         WeatherUIState.Error(errorType = ErrorType.LocationServicesDisabled)
                 }
-                _locationEnabled.value = isEnabled
             }
             .launchIn(viewModelScope)
+    }
 
+    private fun fetchWeatherOnPermissionChange() {
         combine(locationPermissionGranted, locationEnabled) { permissionGranted, locationEnabled ->
             permissionGranted && locationEnabled
         }.onEach { shouldFetch ->
@@ -74,7 +96,11 @@ class CurrentWeatherViewModel @Inject constructor(
                 fetchWeatherOnLocation()
             }
         }.launchIn(viewModelScope)
+    }
 
+    fun startLocationWeatherUpdates() {
+        trackLocationEnabledStatus()
+        fetchWeatherOnPermissionChange()
         checkLocationPermission()
     }
 
