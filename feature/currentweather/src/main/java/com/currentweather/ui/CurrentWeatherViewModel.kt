@@ -15,9 +15,12 @@ import com.currentweather.data.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -25,6 +28,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.getOrThrow
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
@@ -43,6 +47,9 @@ class CurrentWeatherViewModel @Inject constructor(
     private val _searchLocation = MutableStateFlow("")
     val searchLocation = _searchLocation.asStateFlow()
 
+    private val _searchLocationResults = MutableStateFlow<List<String>>(emptyList())
+    val searchLocationResults = _searchLocationResults.asStateFlow()
+
     private val _locationPermissionGranted = MutableStateFlow(false)
     val locationPermissionGranted = _locationPermissionGranted.asStateFlow()
 
@@ -52,18 +59,44 @@ class CurrentWeatherViewModel @Inject constructor(
     private val _requestLocationPermissions = MutableStateFlow(false)
     val requestLocationPermissions = _requestLocationPermissions.asStateFlow()
 
+    fun observeSearchLocation() {
+        _searchLocation
+            .debounce(300)
+            .distinctUntilChanged()
+            .onEach { cityName ->
+                if (cityName.isNotBlank()) {
+                    searchLocationApiCall(cityName)
+                } else {
+                    _searchLocationResults.value = emptyList()
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
     fun updateSearchLocation(cityName: String) {
         _searchLocation.value = cityName
     }
 
-    fun searchLocation(cityName: String) {
+    fun searchLocationApiCall(cityName: String) {
         viewModelScope.launch {
-            searchLocationRepository.searchLocation(cityName).onSuccess {
-                _searchLocation.value = it.toString()
+            val result = searchLocationRepository.searchLocation(cityName)
+            result.onSuccess { locations ->
+                _searchLocationResults.value = locations.map { "${it.name}, ${it.country}" }
             }.onFailure {
-                _searchLocation.value = it.toString()
+                _searchLocationResults.value = emptyList()
             }
         }
+    }
+
+    private fun extractCityName(formattedLocationString: String): String {
+        return formattedLocationString.split(",").firstOrNull()?.trim() ?: formattedLocationString
+    }
+
+    fun handleSearchResultClick(formattedLocationString: String) {
+        val cityName = extractCityName(formattedLocationString)
+        updateSearchLocation(cityName)
+        _searchLocationResults.value = emptyList()
+        fetchWeatherOnLocation(cityName)
     }
 
     private fun checkLocationPermission() {
@@ -105,15 +138,17 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun fetchWeatherOnLocation() {
+    private fun fetchWeatherOnLocation(location: String = "") {
         if (_weatherUIState.value is WeatherUIState.Loading) return
 
         _weatherUIState.value = WeatherUIState.Loading
 
         viewModelScope.launch {
             try {
-                val location = locationRepository.getLocationUpdates().first()
-                val locationString = "${location.latitude},${location.longitude}"
+                val locationString = location.ifEmpty {
+                    val location = locationRepository.getLocationUpdates().first()
+                    "${location.latitude},${location.longitude}"
+                }
 
                 val (currentWeather, forecast) = coroutineScope {
                     val currentWeatherDeferred =
@@ -121,7 +156,8 @@ class CurrentWeatherViewModel @Inject constructor(
                     val forecastDeferred =
                         async { weatherRepository.fetchForecast(locationString, 1) }
 
-                    currentWeatherDeferred.await().getOrThrow() to forecastDeferred.await().getOrThrow()
+                    currentWeatherDeferred.await().getOrThrow() to forecastDeferred.await()
+                        .getOrThrow()
                 }
 
                 _weatherUIState.value = WeatherUIState.Success(
@@ -203,10 +239,12 @@ sealed interface WeatherUIState {
      * Represents the idle state of the UI.
      */
     data object Idle : WeatherUIState
+
     /**
      * Represents the loading state of the UI.
      */
     data object Loading : WeatherUIState
+
     /**
      * Represents the success state of the UI, containing current weather and forecast data.
      * @param currentWeather The current weather information.

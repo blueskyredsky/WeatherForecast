@@ -3,13 +3,13 @@ package com.currentweather.data.model.search
 import com.network.models.reponse.search.SearchDTO
 
 data class Search(
-    private val id: Int,
-    private val name: String,
-    private val region: String,
-    private val country: String,
-    private val lat: Double,
-    private val lon: Double,
-    private val url: String
+    val id: Int,
+    val name: String,
+    val region: String,
+    val country: String,
+    val lat: Double,
+    val lon: Double,
+    val url: String
 )
 
 fun List<SearchDTO>.toListSearch(): Result<List<Search>> {

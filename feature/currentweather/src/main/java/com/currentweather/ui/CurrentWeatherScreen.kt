@@ -16,9 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -41,6 +38,7 @@ fun CurrentWeatherScreen(
     val weatherUIState by viewModel.weatherUIState.collectAsStateWithLifecycle()
     val weatherUIData by viewModel.weatherUIData.collectAsStateWithLifecycle()
     val searchLocation by viewModel.searchLocation.collectAsStateWithLifecycle()
+    val searchLocationResults by viewModel.searchLocationResults.collectAsStateWithLifecycle()
     val locationPermissionGranted by viewModel.locationPermissionGranted.collectAsStateWithLifecycle()
     val locationEnabled by viewModel.locationEnabled.collectAsStateWithLifecycle()
     val requestLocationPermissions by viewModel.requestLocationPermissions.collectAsStateWithLifecycle()
@@ -73,6 +71,10 @@ fun CurrentWeatherScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.observeSearchLocation()
+    }
+
     Scaffold(
         topBar = {
             Box(modifier = Modifier
@@ -80,11 +82,11 @@ fun CurrentWeatherScreen(
                 .background(appBarColor)) {
                 CustomSearchBar(
                     query = searchLocation,
-                    onQueryChange = viewModel::searchLocation,
-                    onSearch = viewModel::updateSearchLocation,
-                    searchResults = listOf("1", "2", "3"),
+                    onQueryChange = viewModel::updateSearchLocation,
+                    onSearch = viewModel::searchLocationApiCall,
+                    searchResults = searchLocationResults,
                     onResultClick = {
-
+                        viewModel.handleSearchResultClick(it)
                     }
                 )
             }
