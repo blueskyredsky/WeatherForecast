@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.common.model.ErrorType
 import com.currentweather.R
 import com.currentweather.ui.component.CustomSearchBar
+import com.currentweather.ui.component.ErrorItem
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
@@ -99,15 +100,18 @@ fun CurrentWeatherScreen(
             is WeatherUIState.Error -> {
                 when (result.errorType) {
                     ErrorType.LocationServicesDisabled -> {
-                        Button(onClick = {
-                            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                            context.startActivity(intent)
-                        }) {
-                            Text(
-                                textAlign = TextAlign.Center,
-                                text = stringResource(R.string.enable_location_services)
-                            )
-                        }
+                        ErrorItem(
+                            action = {
+                                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                                context.startActivity(intent)
+                            },
+                            buttonContent = {
+                                Text(
+                                    textAlign = TextAlign.Center,
+                                    text = stringResource(R.string.enable_location_services)
+                                )
+                            }
+                        )
                     }
 
                     ErrorType.LocationPermissionDenied -> {
@@ -116,69 +120,79 @@ fun CurrentWeatherScreen(
                         val permanentlyDenied = !locationPermissionsState.allPermissionsGranted &&
                                 !locationPermissionsState.permissions.any { it.status.shouldShowRationale }
 
-                        if (permanentlyDenied) {
-                            Text(
-                                textAlign = TextAlign.Center,
-                                text = stringResource(R.string.location_permission_permanently_denied_please_enable_in_settings)
-                            )
-                            Button(onClick = {
-                                val intent =
-                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                        data = Uri.fromParts("package", context.packageName, null)
+                        when {
+                            permanentlyDenied -> {
+                                ErrorItem(
+                                    action = {
+                                        val intent =
+                                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                                data = Uri.fromParts("package", context.packageName, null)
+                                            }
+                                        context.startActivity(intent)
+                                    },
+                                    content = {
+                                        Text(
+                                            textAlign = TextAlign.Center,
+                                            text = stringResource(R.string.location_permission_permanently_denied_please_enable_in_settings)
+                                        )
+                                    },
+                                    buttonContent = {
+                                        Text(
+                                            textAlign = TextAlign.Center,
+                                            text = stringResource(R.string.open_settings)
+                                        )
                                     }
-                                context.startActivity(intent)
-                            }) {
-                                Text(
-                                    textAlign = TextAlign.Center,
-                                    text = stringResource(R.string.open_settings)
                                 )
                             }
-                        } else if (showRationale) {
-                            Text(
-                                textAlign = TextAlign.Center,
-                                text = stringResource(R.string.location_permission_is_important_for_this_app_please_grant_it)
-                            )
-                            Button(onClick = {
-                                locationPermissionsState.launchMultiplePermissionRequest()
-                            }) {
-                                Text(
-                                    textAlign = TextAlign.Center,
-                                    text = stringResource(R.string.request_permission_again)
+
+                            showRationale -> {
+                                ErrorItem(
+                                    action = {
+                                        locationPermissionsState.launchMultiplePermissionRequest()
+                                    },
+                                    content = {
+                                        Text(
+                                            textAlign = TextAlign.Center,
+                                            text = stringResource(R.string.location_permission_is_important_for_this_app_please_grant_it)
+                                        )
+                                    },
+                                    buttonContent = {
+                                        Text(
+                                            textAlign = TextAlign.Center,
+                                            text = stringResource(R.string.request_permission_again)
+                                        )
+                                    }
                                 )
                             }
-                        } else {
-                            Button(onClick = {
-                                locationPermissionsState.launchMultiplePermissionRequest()
-                            }) {
-                                Text(
-                                    textAlign = TextAlign.Center,
-                                    text = stringResource(R.string.grant_location_permissions)
+
+                            else -> {
+                                ErrorItem(
+                                    action = {
+                                        locationPermissionsState.launchMultiplePermissionRequest()
+                                    },
+                                    buttonContent = {
+                                        Text(
+                                            textAlign = TextAlign.Center,
+                                            text = stringResource(R.string.grant_location_permissions)
+                                        )
+                                    }
                                 )
                             }
                         }
                     }
 
-                    ErrorType.UnknownError -> {
-                        Button(onClick = {
-                            viewModel.retryFetchWeather()
-                        }) {
-                            Text(
-                                textAlign = TextAlign.Center,
-                                text = stringResource(R.string.retry)
-                            )
-                        }
-                    }
-
-                    ErrorType.MappingError -> {
-                        // todo
-                    }
-
-                    ErrorType.NetworkError -> {
-                        // todo
-                    }
-
-                    ErrorType.NoDataError -> {
-                        // todo
+                    ErrorType.UnknownError, ErrorType.MappingError, ErrorType.NetworkError, ErrorType.NoDataError -> {
+                        ErrorItem(
+                            action = {
+                                viewModel.retryFetchWeather()
+                            },
+                            buttonContent = {
+                                Text(
+                                    textAlign = TextAlign.Center,
+                                    text = stringResource(R.string.retry)
+                                )
+                            }
+                        )
                     }
                 }
             }
