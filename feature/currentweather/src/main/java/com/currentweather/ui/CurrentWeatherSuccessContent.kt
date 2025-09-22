@@ -38,6 +38,7 @@ import com.currentweather.data.model.currentweather.CurrentWeather
 import com.currentweather.data.model.forecast.Forecast
 import com.currentweather.ui.component.ConnectedWavyLines
 import java.util.Calendar
+import kotlin.math.roundToInt
 
 @Composable
 fun SuccessContent(
@@ -79,7 +80,7 @@ fun SuccessContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "${weather.current.tempC}°",
+                    text = "${weather.current.tempC.roundToInt()}°",
                     style = MaterialTheme.typography.displayLarge.copy(fontSize = 100.sp),
                     color = color
                 )

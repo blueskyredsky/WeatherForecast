@@ -17,6 +17,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
@@ -35,8 +36,6 @@ class CurrentWeatherViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val searchLocationRepository: SearchLocationRepository,
 ) : ViewModel() {
-
-    private var hasFetchedCurrentWeather = false
 
     private val _weatherUIState = MutableStateFlow<WeatherUIState>(WeatherUIState.Idle)
     val weatherUIState = _weatherUIState.asStateFlow()
@@ -58,6 +57,9 @@ class CurrentWeatherViewModel @Inject constructor(
 
     private val _requestLocationPermissions = MutableStateFlow(false)
     val requestLocationPermissions = _requestLocationPermissions.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
 
     fun observeSearchLocation() {
         _searchLocation
@@ -133,15 +135,19 @@ class CurrentWeatherViewModel @Inject constructor(
 
     fun startLocationWeatherUpdates() {
         trackLocationEnabledStatus()
-        fetchWeatherOnPermissionChange()
         checkLocationPermission()
+        fetchWeatherOnPermissionChange()
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun fetchWeatherOnLocation(location: String = "") {
-        if (_weatherUIState.value is WeatherUIState.Loading) return
+    private fun fetchWeatherOnLocation(location: String = "", isRefreshing: Boolean = false) {
+        if (_weatherUIState.value is WeatherUIState.Success) return // todo prevent multiple calls
 
-        _weatherUIState.value = WeatherUIState.Loading
+        if (isRefreshing) {
+            _isRefreshing.value = true
+        } else {
+            _weatherUIState.value = WeatherUIState.Loading
+        }
 
         viewModelScope.launch {
             try {
@@ -174,6 +180,10 @@ class CurrentWeatherViewModel @Inject constructor(
                     else -> ErrorType.UnknownError
                 }
                 _weatherUIState.value = WeatherUIState.Error(errorType = errorType)
+            } finally {
+                if (isRefreshing) {
+                    _isRefreshing.value = false
+                }
             }
         }
     }
@@ -187,10 +197,8 @@ class CurrentWeatherViewModel @Inject constructor(
         _requestLocationPermissions.value = false
     }
 
-    fun retryFetchWeather() {
-        _weatherUIState.value = WeatherUIState.Idle
-        hasFetchedCurrentWeather = false
-        fetchWeatherOnLocation()
+    fun retryFetchWeather(isRefreshing: Boolean = false) {
+        fetchWeatherOnLocation(isRefreshing = isRefreshing)
     }
 
     private fun getWeatherUI(text: String): WeatherUI {
