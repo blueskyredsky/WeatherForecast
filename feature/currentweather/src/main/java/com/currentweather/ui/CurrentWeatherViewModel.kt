@@ -98,7 +98,7 @@ class CurrentWeatherViewModel @Inject constructor(
         val cityName = extractCityName(formattedLocationString)
         updateSearchLocation(cityName)
         _searchLocationResults.value = emptyList()
-        fetchWeatherOnLocation(cityName)
+        fetchWeatherOnLocation()
     }
 
     private fun checkLocationPermission() {
@@ -140,8 +140,12 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun fetchWeatherOnLocation(location: String = "", isRefreshing: Boolean = false) {
-        if (_weatherUIState.value is WeatherUIState.Success) return // todo prevent multiple calls
+    private fun fetchWeatherOnLocation(isRefreshing: Boolean = false) {
+        // Only fetch if it's a refresh, a specific location is provided (search),
+        // or the current UI state isn't already a successful one to avoid extra api call on navigating back
+        if (!isRefreshing && _searchLocation.value.isEmpty() && _weatherUIState.value is WeatherUIState.Success) {
+            return
+        }
 
         if (isRefreshing) {
             _isRefreshing.value = true
@@ -151,7 +155,7 @@ class CurrentWeatherViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val locationString = location.ifEmpty {
+                val locationString = _searchLocation.value.ifEmpty {
                     val location = locationRepository.getLocationUpdates().first()
                     "${location.latitude},${location.longitude}"
                 }

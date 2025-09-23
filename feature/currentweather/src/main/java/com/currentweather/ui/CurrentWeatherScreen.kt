@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -81,20 +82,22 @@ fun CurrentWeatherScreen(
 
     Scaffold(
         topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(appBarColor)
-            ) {
-                CustomSearchBar(
-                    query = searchLocation,
-                    onQueryChange = viewModel::updateSearchLocation,
-                    onSearch = viewModel::searchLocationApiCall,
-                    searchResults = searchLocationResults,
-                    onResultClick = {
-                        viewModel.handleSearchResultClick(it)
-                    }
-                )
+            AnimatedVisibility(locationPermissionGranted && locationEnabled) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(appBarColor)
+                ) {
+                    CustomSearchBar(
+                        query = searchLocation,
+                        onQueryChange = viewModel::updateSearchLocation,
+                        onSearch = viewModel::searchLocationApiCall,
+                        searchResults = searchLocationResults,
+                        onResultClick = {
+                            viewModel.handleSearchResultClick(it)
+                        }
+                    )
+                }
             }
         },
         snackbarHost = {
@@ -109,7 +112,8 @@ fun CurrentWeatherScreen(
                     viewModel.retryFetchWeather(isRefreshing = true)
                 }
             },
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .padding(innerPadding)
         ) {
             when (val result = weatherUIState) {
                 is WeatherUIState.Error -> {

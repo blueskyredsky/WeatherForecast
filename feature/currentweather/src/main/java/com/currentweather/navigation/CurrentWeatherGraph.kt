@@ -1,5 +1,6 @@
 package com.currentweather.navigation
 
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -33,7 +34,12 @@ fun NavGraphBuilder.addCurrentWeatherGraph(
         route = CURRENT_WEATHER_GRAPH_ROUTE
     ) {
         composable(CurrentWeatherRoutes.CurrentWeatherHome.route) { backStackEntry ->
-            val viewModel: CurrentWeatherViewModel = hiltViewModel()
+            // Use hiltViewModel from the navigation's parent graph to avoid viewModel recreation when navigating back
+            // to this screen
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(CURRENT_WEATHER_GRAPH_ROUTE)
+            }
+            val viewModel: CurrentWeatherViewModel = hiltViewModel(parentEntry)
             CurrentWeatherScreen(
                 viewModel = viewModel,
                 onNavigateToDetail = { locationName ->

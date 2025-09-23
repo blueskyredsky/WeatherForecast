@@ -134,7 +134,8 @@ fun SuccessContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                weather.location.name.let { cityName ->
+                // todo navigate to detail
+                /*weather.location.name.let { cityName ->
                     Button(
                         onClick = { onNavigateToDetail(cityName) },
                         modifier = Modifier.fillMaxWidth()
@@ -143,7 +144,7 @@ fun SuccessContent(
                             text = stringResource(R.string.view_detail, cityName)
                         )
                     }
-                }
+                }*/
             }
         } ?: run {
             Box(
