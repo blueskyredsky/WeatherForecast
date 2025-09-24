@@ -60,7 +60,7 @@ The application leverages a modern Android development stack:
 
 ## 🎨 Design
 
-The UI design is inspired by the following Figma community design: **Weather App for iOS or Android**.
+The UI design is inspired by the following Figma community design: **[Weather App for iOS or Android](https://www.figma.com/design/y0P4TouoUWlZNpxvt9gfLV/Weather-App-for-iOS-or-Android--Community-?node-id=2-484&t=1zL60dLoRAtIxJmT-0)**.
 
 ---
 
