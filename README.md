@@ -1,12 +1,16 @@
-☀️ Weather Forecast
-==================
+# ☀️ Weather Forecast
+
 This is a modern, modular weather application built for Android using Kotlin and Jetpack Compose. The app follows the MVVM (Model-View-ViewModel) architectural pattern and is designed to provide users with real-time weather data and forecasts. The application is structured into a core module for shared functionalities and a feature module for specific user-facing screens, allowing for a clean and scalable codebase.
 
-# 📋 Features
-1. Current Weather: This feature provides a comprehensive view of the current weather and a 24-hour hourly forecast. It includes:
-    1.1. Automatic Location Detection: The app requests the user's current location to display weather data for their immediate surroundings.
-    1.2. Search Functionality: Users can search for any location worldwide to get detailed weather information and forecasts.
-2. Forecast: This feature expands on the hourly forecast by providing more detailed, long-term weather predictions for a selected location.
+---
+
+## 📋 Features
+
+1.  **Current Weather**: This feature provides a comprehensive view of the current weather and a 24-hour hourly forecast. It includes:
+    1.1. **Automatic Location Detection**: The app requests the user's current location to display weather data for their immediate surroundings.
+    1.2. **Search Functionality**: Users can search for any location worldwide to get detailed weather information and forecasts.
+
+2.  **Forecast**: This feature expands on the hourly forecast by providing more detailed, long-term weather predictions for a selected location.
 
 # 🏗️ Architecture
 The project is built on the MVVM architectural pattern, ensuring a clear separation of concerns.
