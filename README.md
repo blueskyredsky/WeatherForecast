@@ -2,6 +2,11 @@
 
 This is a modern, modular weather application built for Android using Kotlin and Jetpack Compose. The app follows the MVVM (Model-View-ViewModel) architectural pattern and is designed to provide users with real-time weather data and forecasts. The application is structured into a core module for shared functionalities and a feature module for specific user-facing screens, allowing for a clean and scalable codebase.
 
+<img width="300" height="600" alt="Screenshot_1759125677" src="https://github.com/user-attachments/assets/112d76ee-073d-4d19-b962-4979e0d83f59" />
+<img width="300" height="600" alt="Screenshot_1759125583" src="https://github.com/user-attachments/assets/430d558a-69c4-46d1-9ec0-7fc7497e66a6" />
+<img width="300" height="600" alt="Screenshot_1759125599" src="https://github.com/user-attachments/assets/ca44baf8-3156-46bf-910b-098ff6a8811a" />
+<img width="300" height="600" alt="Screenshot_1759125746" src="https://github.com/user-attachments/assets/ffea2961-a469-43fe-aff7-50874ab7693f" />
+
 ---
 
 ## 📋 Features
