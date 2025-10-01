@@ -1,0 +1,107 @@
+name: Android CI
+
+on:
+  # Triggers the workflow on push or pull request events to the 'main' branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Defines two jobs that can run in parallel
+jobs:
+  run_tests:
+    name: Run Unit and UI Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant Execute Permission to gradlew
+        run: chmod +x gradlew
+
+      # ------------------------------------
+      # 1. Run Unit Tests (no emulator needed)
+      # ------------------------------------
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest
+
+      # ------------------------------------
+      # 2. Run UI/Instrumented Tests (requires emulator)
+      # ------------------------------------
+      - name: Run UI Tests with Emulator
+        # This action sets up and runs an Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30 # Specify a target Android API level (e.g., Android 11)
+          target: default
+          arch: x86_64
+          profile: Nexus 6
+          script: ./gradlew connectedDebugAndroidTest
+
+      - name: Upload Test Reports (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/build/reports/' # Uploads all test reports (unit and UI)
+
+  build_apks:
+    name: Build APKs and AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant Execute Permission to gradlew
+        run: chmod +x gradlew
+
+      # ------------------------------------
+      # 3. Build Debug and Release Versions
+      # ------------------------------------
+      - name: Build Debug and Release APKs
+        # Executes standard Gradle commands to generate debug and release artifacts
+        run: ./gradlew assembleDebug assembleRelease
+
+        # NOTE ON RELEASE BUILD:
+        # The 'assembleRelease' task is included, but it will LIKELY FAIL
+        # unless you have configured signing credentials (keystore, passwords)
+        # as GitHub Secrets and added logic to apply them in your build.gradle.
+        # If the release build fails, you may want to remove 'assembleRelease'
+        # until signing is configured.
+
+      # ------------------------------------
+      # 4. Upload Build Artifacts
+      # ------------------------------------
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload Release Artifacts (if successful)
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: app-release-artifacts
+          path: app/build/outputs/apk/release/*.apk # Or aab if you run 'bundleRelease'
+          # This path assumes the standard Android project structure (app module).
+          # Adjust the path if your build output location is different.
