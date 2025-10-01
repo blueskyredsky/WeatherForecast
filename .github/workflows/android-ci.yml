@@ -3,9 +3,9 @@ name: Android CI
 on:
   # Triggers the workflow on push or pull request events to the 'main' branch
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -29,6 +29,13 @@ jobs:
 
       - name: Grant Execute Permission to gradlew
         run: chmod +x gradlew
+
+      # --- FIX: Create local.properties for API Key ---
+      # This step creates the local.properties file on the runner
+      # using the secret you set up in GitHub settings.
+      - name: Create local.properties for API Key
+        run: echo "API_KEY=${{ secrets.API_KEY }}" > local.properties
+        # The secret must be available in your repository settings under the name 'API_KEY'
 
       # ------------------------------------
       # 1. Run Unit Tests (no emulator needed)
@@ -73,6 +80,11 @@ jobs:
 
       - name: Grant Execute Permission to gradlew
         run: chmod +x gradlew
+
+      # --- FIX: Create local.properties for API Key ---
+      # This step ensures the build job also has the necessary local.properties file.
+      - name: Create local.properties for API Key
+        run: echo "API_KEY=${{ secrets.API_KEY }}" > local.properties
 
       # ------------------------------------
       # 3. Build Debug and Release Versions
