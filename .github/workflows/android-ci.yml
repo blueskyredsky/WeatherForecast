@@ -1,7 +1,6 @@
 name: Android CI
 
 on:
-  # Triggers the workflow on push or pull request events to the 'main' branch
   push:
     branches: [ "master" ]
   pull_request:
@@ -10,7 +9,6 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Defines two jobs that can run in parallel, now 'build_apks' depends on 'run_tests'
 jobs:
   run_tests:
     name: Run Unit and UI Tests
@@ -30,30 +28,26 @@ jobs:
       - name: Grant Execute Permission to gradlew
         run: chmod +x gradlew
 
-      # --- FIX: Create local.properties for API Key ---
-      # This step creates the local.properties file on the runner
-      # using the secret you set up in GitHub settings.
       - name: Create local.properties for API Key
         run: echo "API_KEY=${{ secrets.API_KEY }}" > local.properties
-        # The secret must be available in your repository settings under the name 'API_KEY'
 
       # ------------------------------------
-      # 1. Run Unit Tests (no emulator needed)
+      # 1. Run Unit Tests
       # ------------------------------------
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest
 
       # ------------------------------------
-      # 2. Run UI/Instrumented Tests (requires emulator)
+      # 2. Run UI/Instrumented Tests
       # ------------------------------------
       - name: Run UI Tests with Emulator
-        # This action sets up and runs an Android emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30 # Specify a target Android API level (e.g., Android 11)
+          api-level: 33
           target: default
           arch: x86_64
           profile: Nexus 6
+          timeout: 600
           script: ./gradlew connectedDebugAndroidTest
 
       - name: Upload Test Reports (optional)
@@ -61,12 +55,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: '**/build/reports/' # Uploads all test reports (unit and UI)
+          path: '**/build/reports/'
 
   build_apks:
     name: Build APKs and AAB
     runs-on: ubuntu-latest
-    needs: run_tests # ADDED: This ensures this job runs ONLY after 'run_tests' succeeds.
+    needs: run_tests
 
     steps:
       - name: Checkout Repository
@@ -82,8 +76,6 @@ jobs:
       - name: Grant Execute Permission to gradlew
         run: chmod +x gradlew
 
-      # --- FIX: Create local.properties for API Key ---
-      # This step ensures the build job also has the necessary local.properties file.
       - name: Create local.properties for API Key
         run: echo "API_KEY=${{ secrets.API_KEY }}" > local.properties
 
@@ -91,15 +83,7 @@ jobs:
       # 3. Build Debug and Release Versions
       # ------------------------------------
       - name: Build Debug and Release APKs
-        # Executes standard Gradle commands to generate debug and release artifacts
         run: ./gradlew assembleDebug assembleRelease
-
-        # NOTE ON RELEASE BUILD:
-        # The 'assembleRelease' task is included, but it will LIKELY FAIL
-        # unless you have configured signing credentials (keystore, passwords)
-        # as GitHub Secrets and added logic to apply them in your build.gradle.
-        # If the release build fails, you may want to remove 'assembleRelease'
-        # until signing is configured.
 
       # ------------------------------------
       # 4. Upload Build Artifacts
@@ -116,5 +100,3 @@ jobs:
         with:
           name: app-release-artifacts
           path: app/build/outputs/apk/release/*.apk # Or aab if you run 'bundleRelease'
-          # This path assumes the standard Android project structure (app module).
-          # Adjust the path if your build output location is different.
