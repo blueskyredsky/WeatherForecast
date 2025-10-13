@@ -3,29 +3,35 @@ package com.notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private const val MAX_NUM_NOTIFICATIONS = 5
+private const val TARGET_ACTIVITY_NAME = "com.weatherforcast.MainActivity"
+private const val WEATHER_FORECAST_NOTIFICATION_CHANNEL_ID = ""
+
 @Singleton
 class DefaultNotificationHandler @Inject constructor(
     @ApplicationContext private val context: Context
 ) : NotificationHandler {
+
     private val CHANNEL_ID = "weather_updates_channel"
     private val NOTIFICATION_ID = 101
 
-    private val MAIN_ACTIVITY_CLASS_NAME = "com.weatherforcast.app.MainActivity"
-
     override fun showWeatherNotification(title: String, content: String) {
-        createNotificationChannel() // Call without context
+        createNotificationChannel()
 
         // Intent to launch MainActivity, which will handle navigation to the weather screen
-        val intent = Intent(context, Class.forName(MAIN_ACTIVITY_CLASS_NAME)).apply { // Use injected context
+        val intent = Intent(context, Class.forName(TARGET_ACTIVITY_NAME)).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
@@ -60,14 +66,31 @@ class DefaultNotificationHandler @Inject constructor(
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Weather Updates"
-            val descriptionText = "Shows current weather conditions twice daily."
+            val descriptionText = "Current weather conditions for your location."
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText
             }
             val notificationManager: NotificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager // Use injected context
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
+}
+
+/**
+ * Ensures that a notification channel is present if applicable
+ */
+private fun Context.ensureNotificationChannelExists() {
+    if (VERSION.SDK_INT < VERSION_CODES.O) return
+
+    val channel = NotificationChannel(
+        WEATHER_FORECAST_NOTIFICATION_CHANNEL_ID,
+        getString(R.string.core_notification_weather_forecast_notification_channel_name),
+        NotificationManager.IMPORTANCE_DEFAULT,
+    ).apply {
+        description = getString(R.string.core_notification_weather_forecast_notification_channel_description)
+    }
+    // Register the channel with the system
+    NotificationManagerCompat.from(this).createNotificationChannel(channel)
 }
