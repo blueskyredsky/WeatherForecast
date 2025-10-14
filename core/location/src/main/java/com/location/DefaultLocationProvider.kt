@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
@@ -15,11 +16,15 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -95,4 +100,36 @@ class DefaultLocationProvider @Inject constructor(
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
     }
+
+    override suspend fun getCityName(latitude: Double, longitude: Double): String? =
+        withContext(Dispatchers.IO) {
+            try {
+                // Instantiate the Geocoder
+                val geocoder = Geocoder(context, Locale.getDefault())
+
+                // Perform the reverse geocoding lookup (max 1 result)
+                // Note: The new Geocoder API uses getFromLocation with a callback,
+                // but the old one is often easier to use with suspend/IO.
+                @Suppress("DEPRECATION")
+                val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+
+                // Extract the city or address line
+                if (!addresses.isNullOrEmpty()) {
+                    val address = addresses[0]
+
+                    // Prioritize city/locality, then use the address line
+                    return@withContext address.locality ?: address.getAddressLine(0)
+                }
+                return@withContext null
+
+            } catch (e: IOException) {
+                // Handle network issues, service unavailability, etc.
+                e.printStackTrace()
+                return@withContext null
+            } catch (e: IllegalArgumentException) {
+                // Handle invalid lat/long values
+                e.printStackTrace()
+                return@withContext null
+            }
+        }
 }

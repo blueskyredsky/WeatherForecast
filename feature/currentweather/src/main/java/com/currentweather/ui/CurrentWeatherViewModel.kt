@@ -12,6 +12,7 @@ import com.currentweather.data.model.forecast.Forecast
 import com.currentweather.data.repository.LocationRepository
 import com.currentweather.data.repository.SearchLocationRepository
 import com.currentweather.data.repository.WeatherRepository
+import com.datastore.UserPreferenceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -35,6 +36,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
     private val locationRepository: LocationRepository,
     private val searchLocationRepository: SearchLocationRepository,
+    private val userManager: UserPreferenceManager
 ) : ViewModel() {
 
     private val _weatherUIState = MutableStateFlow<WeatherUIState>(WeatherUIState.Idle)
@@ -169,6 +171,8 @@ class CurrentWeatherViewModel @Inject constructor(
                     currentWeatherDeferred.await().getOrThrow() to forecastDeferred.await()
                         .getOrThrow()
                 }
+
+                userManager.saveUserLocation(locationString)
 
                 _weatherUIState.value = WeatherUIState.Success(
                     currentWeather = currentWeather,

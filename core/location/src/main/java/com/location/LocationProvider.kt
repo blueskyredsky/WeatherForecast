@@ -32,4 +32,7 @@ interface LocationProvider {
      *  Returns true if the app has location permissions, false otherwise.
      */
     fun hasLocationPermissions(): Boolean
+
+
+    suspend fun getCityName(latitude: Double, longitude: Double): String?
 }

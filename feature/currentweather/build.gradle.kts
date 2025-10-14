@@ -45,6 +45,7 @@ dependencies {
     implementation(projects.core.location)
     implementation(projects.core.threading)
     implementation(projects.core.common)
+    implementation(projects.core.datastore)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
