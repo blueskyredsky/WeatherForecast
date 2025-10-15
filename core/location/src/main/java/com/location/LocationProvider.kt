@@ -33,6 +33,8 @@ interface LocationProvider {
      */
     fun hasLocationPermissions(): Boolean
 
-
+    /**
+     * Returns the name of a city based on the provided latitude and longitude.
+     */
     suspend fun getCityName(latitude: Double, longitude: Double): String?
 }

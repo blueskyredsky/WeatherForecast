@@ -205,7 +205,7 @@ fun CurrentWeatherScreen(
                             }
                         }
 
-                        ErrorType.UnknownError, ErrorType.MappingError, ErrorType.NetworkError, ErrorType.NoDataError -> {
+                        ErrorType.UnknownError, ErrorType.MappingError, ErrorType.NetworkError, ErrorType.NoDataError, ErrorType.CityNameError -> {
                             ErrorItem(
                                 action = {
                                     viewModel.retryFetchWeather()
@@ -221,7 +221,7 @@ fun CurrentWeatherScreen(
                     }
                 }
 
-                WeatherUIState.Idle -> Unit
+                WeatherUIState.Idle -> Box(modifier = Modifier.fillMaxSize())
                 WeatherUIState.Loading -> {
                     LoadingContent(
                         modifier = Modifier

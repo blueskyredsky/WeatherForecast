@@ -28,4 +28,11 @@ class DefaultLocationRepository @Inject constructor(
     override fun hasLocationPermissions(): Boolean {
         return locationProvider.hasLocationPermissions()
     }
+
+    override suspend fun getCityName(
+        latitude: Double,
+        longitude: Double
+    ): String? {
+        return locationProvider.getCityName(latitude = latitude, longitude = longitude)
+    }
 }

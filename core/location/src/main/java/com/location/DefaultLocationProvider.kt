@@ -4,10 +4,14 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
+import android.os.Build
 import android.os.Looper
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -15,21 +19,24 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.reza.threading.common.IoDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Singleton
+import kotlin.coroutines.resume
 
 class DefaultLocationProvider @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : LocationProvider {
 
     private val fusedLocationClient: FusedLocationProviderClient =
@@ -102,34 +109,76 @@ class DefaultLocationProvider @Inject constructor(
     }
 
     override suspend fun getCityName(latitude: Double, longitude: Double): String? =
-        withContext(Dispatchers.IO) {
-            try {
-                // Instantiate the Geocoder
-                val geocoder = Geocoder(context, Locale.getDefault())
+        withContext(ioDispatcher) {
+            val geocoder = Geocoder(context, Locale.getDefault())
 
-                // Perform the reverse geocoding lookup (max 1 result)
-                // Note: The new Geocoder API uses getFromLocation with a callback,
-                // but the old one is often easier to use with suspend/IO.
-                @Suppress("DEPRECATION")
-                val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-
-                // Extract the city or address line
-                if (!addresses.isNullOrEmpty()) {
-                    val address = addresses[0]
-
-                    // Prioritize city/locality, then use the address line
-                    return@withContext address.locality ?: address.getAddressLine(0)
+            return@withContext try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    getFromLocationApi33(geocoder, latitude, longitude)
+                } else {
+                    getFromLocationLegacy(geocoder, latitude, longitude)
                 }
-                return@withContext null
-
-            } catch (e: IOException) {
-                // Handle network issues, service unavailability, etc.
+            } catch (e: Exception) {
                 e.printStackTrace()
-                return@withContext null
-            } catch (e: IllegalArgumentException) {
-                // Handle invalid lat/long values
-                e.printStackTrace()
-                return@withContext null
+                null
             }
         }
+
+    /**
+     * Uses the new Geocoder API (API 33 / Android 13 and up).
+     */
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun getFromLocationApi33(
+        geocoder: Geocoder,
+        latitude: Double,
+        longitude: Double
+    ): String? =
+        suspendCancellableCoroutine { continuation ->
+            val listener = object : Geocoder.GeocodeListener {
+                override fun onGeocode(addresses: List<Address?>) {
+                    if (continuation.isActive) {
+                        val result = if (addresses.isNotEmpty()) {
+                            val address = addresses[0]
+                            address?.locality ?: address?.getAddressLine(0)
+                        } else {
+                            null
+                        }
+                        continuation.resume(result)
+                    }
+                }
+
+                override fun onError(errorMessage: String?) {
+                    if (continuation.isActive) {
+                        Log.e("Geocoder", "Geocoding error: $errorMessage")
+                        continuation.resume(null)
+                    }
+                }
+            }
+            geocoder.getFromLocation(latitude, longitude, 1, listener)
+        }
+
+    /**
+     * Uses the deprecated synchronous Geocoder API (API 32 / Android 12 and below).
+     */
+    private fun getFromLocationLegacy(
+        geocoder: Geocoder,
+        latitude: Double,
+        longitude: Double
+    ): String? {
+        return try {
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            if (!addresses.isNullOrEmpty()) {
+                val address = addresses[0]
+                address.locality ?: address.getAddressLine(0)
+            } else {
+                null
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+            null
+        }
+    }
 }

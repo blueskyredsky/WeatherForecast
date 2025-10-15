@@ -1,5 +1,6 @@
 package com.currentweather.ui
 
+import android.util.Log
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.ViewModel
@@ -12,6 +13,7 @@ import com.currentweather.data.model.forecast.Forecast
 import com.currentweather.data.repository.LocationRepository
 import com.currentweather.data.repository.SearchLocationRepository
 import com.currentweather.data.repository.WeatherRepository
+import com.currentweather.ui.component.ErrorItem
 import com.datastore.UserPreferenceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -24,6 +26,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -157,29 +160,44 @@ class CurrentWeatherViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val locationString = _searchLocation.value.ifEmpty {
-                    val location = locationRepository.getLocationUpdates().first()
-                    "${location.latitude},${location.longitude}"
+                var cityName: String? = _searchLocation.value
+
+                if (cityName?.isEmpty() == true) {
+                    try {
+                        val location = locationRepository.getLocationUpdates().first()
+                        cityName = locationRepository.getCityName(
+                            latitude = location.latitude,
+                            longitude = location.longitude
+                        )
+                    } catch (e: Exception) {
+                        // Current location fetch failed, fall back to the saved location.
+                        cityName = userManager.userLocationFlow.firstOrNull()
+                        Log.e("TAG", "fetchWeatherOnLocation: $e")
+                    }
                 }
 
-                val (currentWeather, forecast) = coroutineScope {
-                    val currentWeatherDeferred =
-                        async { weatherRepository.fetchCurrentWeather(locationString) }
-                    val forecastDeferred =
-                        async { weatherRepository.fetchForecast(locationString, 1) }
+                cityName?.let {
+                    val (currentWeather, forecast) = coroutineScope {
+                        val currentWeatherDeferred =
+                            async { weatherRepository.fetchCurrentWeather(it) }
+                        val forecastDeferred =
+                            async { weatherRepository.fetchForecast(it, 1) }
 
-                    currentWeatherDeferred.await().getOrThrow() to forecastDeferred.await()
-                        .getOrThrow()
+                        currentWeatherDeferred.await().getOrThrow() to forecastDeferred.await()
+                            .getOrThrow()
+                    }
+
+                    userManager.saveUserLocation(it)
+
+                    _weatherUIState.value = WeatherUIState.Success(
+                        currentWeather = currentWeather,
+                        forecast = forecast
+                    )
+
+                    _weatherUIData.value = getWeatherUI(currentWeather.current.condition.text)
+                } ?: run {
+                    _weatherUIState.value = WeatherUIState.Error(errorType = ErrorType.CityNameError)
                 }
-
-                userManager.saveUserLocation(locationString)
-
-                _weatherUIState.value = WeatherUIState.Success(
-                    currentWeather = currentWeather,
-                    forecast = forecast
-                )
-
-                _weatherUIData.value = getWeatherUI(currentWeather.current.condition.text)
             } catch (e: Exception) {
                 val errorType = when (e) {
                     is RepositoryError.NetworkError -> ErrorType.NetworkError

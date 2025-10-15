@@ -15,4 +15,5 @@ sealed interface ErrorType {
     data object MappingError : ErrorType
     data object LocationPermissionDenied : ErrorType
     data object UnknownError : ErrorType
+    data object CityNameError : ErrorType
 }

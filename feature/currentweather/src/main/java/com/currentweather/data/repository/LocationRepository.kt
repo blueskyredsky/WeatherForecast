@@ -26,4 +26,9 @@ interface LocationRepository {
      * Returns whether the app has location permissions.
      */
     fun hasLocationPermissions(): Boolean
+
+    /**
+     * Returns the name of the city based on the provided latitude and longitude.
+     */
+    suspend fun getCityName(latitude: Double, longitude: Double): String?
 }

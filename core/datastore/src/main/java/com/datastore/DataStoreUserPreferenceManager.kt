@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -19,7 +20,7 @@ private val USER_LOCATION_KEY = stringPreferencesKey("user_location")
 
 @Singleton
 class DataStoreUserPreferenceManager @Inject constructor(
-    private val context: Context,
+    @ApplicationContext private val context: Context,
 ) : UserPreferenceManager {
 
     private val dataStore = context.dataStore
