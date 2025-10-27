@@ -29,10 +29,7 @@ class DefaultLocationRepository @Inject constructor(
         return locationProvider.hasLocationPermissions()
     }
 
-    override suspend fun getCityName(
-        latitude: Double,
-        longitude: Double
-    ): String? {
-        return locationProvider.getCityName(latitude = latitude, longitude = longitude)
+    override suspend fun getCoordinatesForCity(cityName: String): Location? {
+        return locationProvider.getCoordinatesForCity(cityName)
     }
 }

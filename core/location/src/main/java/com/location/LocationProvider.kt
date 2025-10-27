@@ -34,7 +34,10 @@ interface LocationProvider {
     fun hasLocationPermissions(): Boolean
 
     /**
-     * Returns the name of a city based on the provided latitude and longitude.
+     * Returns the coordinates for a given city name.
+     *
+     * @param cityName The name of the city to get coordinates for.
+     * @return A [Location] object representing the city's coordinates, or null if not found.
      */
-    suspend fun getCityName(latitude: Double, longitude: Double): String?
+    suspend fun getCoordinatesForCity(cityName: String): Location?
 }

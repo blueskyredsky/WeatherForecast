@@ -3,6 +3,7 @@ package com.datastore
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -16,7 +17,8 @@ import javax.inject.Singleton
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_settings")
 
 // Preference Key
-private val USER_LOCATION_KEY = stringPreferencesKey("user_location")
+private val USER_LATITUDE_KEY = doublePreferencesKey("user_latitude")
+private val USER_LONGITUDE_KEY = doublePreferencesKey("user_longitude")
 
 @Singleton
 class DataStoreUserPreferenceManager @Inject constructor(
@@ -25,14 +27,17 @@ class DataStoreUserPreferenceManager @Inject constructor(
 
     private val dataStore = context.dataStore
 
-    override val userLocationFlow: Flow<String?> = dataStore.data
+    override val userCoordinatesFlow: Flow<Coordinates> = dataStore.data
         .map { preferences ->
-            preferences[USER_LOCATION_KEY]
+            val latitude = preferences[USER_LATITUDE_KEY]
+            val longitude = preferences[USER_LONGITUDE_KEY]
+            Coordinates(latitude, longitude)
         }
 
-    override suspend fun saveUserLocation(location: String) {
+    override suspend fun saveUserCoordinates(latitude: Double, longitude: Double) {
         dataStore.edit { preferences ->
-            preferences[USER_LOCATION_KEY] = location
+            preferences[USER_LATITUDE_KEY] = latitude
+            preferences[USER_LONGITUDE_KEY] = longitude
         }
     }
 }

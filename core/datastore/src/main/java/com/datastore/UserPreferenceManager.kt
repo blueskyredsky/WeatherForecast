@@ -3,14 +3,19 @@ package com.datastore
 import kotlinx.coroutines.flow.Flow
 
 interface UserPreferenceManager {
-    /**
-     * Provides a Flow of the user's saved location.
-     * Emits null if no location is set.
-     */
-    val userLocationFlow: Flow<String?>
 
     /**
-     * Suspends and saves the user's location string.
+     * Flow of the user's coordinates.
      */
-    suspend fun saveUserLocation(location: String)
+    val userCoordinatesFlow: Flow<Coordinates?>
+
+    /**
+     * Saves the user's coordinates.
+     */
+    suspend fun saveUserCoordinates(latitude: Double, longitude: Double)
 }
+
+data class Coordinates(
+    val latitude: Double? = null,
+    val longitude: Double? = null
+)

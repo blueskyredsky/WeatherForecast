@@ -39,7 +39,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
     private val locationRepository: LocationRepository,
     private val searchLocationRepository: SearchLocationRepository,
-    private val userManager: UserPreferenceManager
+    private val userPreferenceManager: UserPreferenceManager
 ) : ViewModel() {
 
     private val _weatherUIState = MutableStateFlow<WeatherUIState>(WeatherUIState.Idle)
@@ -160,23 +160,23 @@ class CurrentWeatherViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                var cityName: String? = _searchLocation.value
+                var location: String? = _searchLocation.value
 
-                if (cityName?.isEmpty() == true) {
+                if (location?.isEmpty() == true) {
                     try {
-                        val location = locationRepository.getLocationUpdates().first()
-                        cityName = locationRepository.getCityName(
-                            latitude = location.latitude,
-                            longitude = location.longitude
-                        )
+                        val firstLocationUpdate = locationRepository.getLocationUpdates().first()
+                        userPreferenceManager.saveUserCoordinates(latitude = firstLocationUpdate.latitude, longitude = firstLocationUpdate.longitude)
+                        location = "${firstLocationUpdate.latitude},${firstLocationUpdate.longitude}"
                     } catch (e: Exception) {
                         // Current location fetch failed, fall back to the saved location.
-                        cityName = userManager.userLocationFlow.firstOrNull()
+                        userPreferenceManager.userCoordinatesFlow.firstOrNull()?.let { savedLocation ->
+                            location = "${savedLocation.latitude},${savedLocation.longitude}"
+                        }
                         Log.e("TAG", "fetchWeatherOnLocation: $e")
                     }
                 }
 
-                cityName?.let {
+                location?.let {
                     val (currentWeather, forecast) = coroutineScope {
                         val currentWeatherDeferred =
                             async { weatherRepository.fetchCurrentWeather(it) }
@@ -186,8 +186,6 @@ class CurrentWeatherViewModel @Inject constructor(
                         currentWeatherDeferred.await().getOrThrow() to forecastDeferred.await()
                             .getOrThrow()
                     }
-
-                    userManager.saveUserLocation(it)
 
                     _weatherUIState.value = WeatherUIState.Success(
                         currentWeather = currentWeather,

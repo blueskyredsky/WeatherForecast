@@ -108,15 +108,15 @@ class DefaultLocationProvider @Inject constructor(
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
-    override suspend fun getCityName(latitude: Double, longitude: Double): String? =
+    override suspend fun getCoordinatesForCity(cityName: String): Location? =
         withContext(ioDispatcher) {
             val geocoder = Geocoder(context, Locale.getDefault())
 
             return@withContext try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    getFromLocationApi33(geocoder, latitude, longitude)
+                    getFromLocationNameApi33(geocoder, cityName)
                 } else {
-                    getFromLocationLegacy(geocoder, latitude, longitude)
+                    getFromLocationNameLegacy(geocoder, cityName)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -124,22 +124,24 @@ class DefaultLocationProvider @Inject constructor(
             }
         }
 
-    /**
-     * Uses the new Geocoder API (API 33 / Android 13 and up).
-     */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private suspend fun getFromLocationApi33(
+    private suspend fun getFromLocationNameApi33(
         geocoder: Geocoder,
-        latitude: Double,
-        longitude: Double
-    ): String? =
+        locationName: String
+    ): Location? =
         suspendCancellableCoroutine { continuation ->
             val listener = object : Geocoder.GeocodeListener {
                 override fun onGeocode(addresses: List<Address?>) {
                     if (continuation.isActive) {
                         val result = if (addresses.isNotEmpty()) {
-                            val address = addresses[0]
-                            address?.locality ?: address?.getAddressLine(0)
+                            addresses.firstNotNullOfOrNull { address ->
+                                address?.let {
+                                    Location("geocoder").apply {
+                                        latitude = it.latitude
+                                        longitude = it.longitude
+                                    }
+                                }
+                            }
                         } else {
                             null
                         }
@@ -149,27 +151,28 @@ class DefaultLocationProvider @Inject constructor(
 
                 override fun onError(errorMessage: String?) {
                     if (continuation.isActive) {
-                        Log.e("Geocoder", "Geocoding error: $errorMessage")
+                        Log.e("Geocoder", "Forward geocoding error: $errorMessage")
                         continuation.resume(null)
                     }
                 }
             }
-            geocoder.getFromLocation(latitude, longitude, 1, listener)
+            // Request up to 5 results for better chance of finding a match
+            geocoder.getFromLocationName(locationName, 5, listener)
         }
 
-    /**
-     * Uses the deprecated synchronous Geocoder API (API 32 / Android 12 and below).
-     */
-    private fun getFromLocationLegacy(
+    private fun getFromLocationNameLegacy(
         geocoder: Geocoder,
-        latitude: Double,
-        longitude: Double
-    ): String? {
+        locationName: String
+    ): Location? {
         return try {
-            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            // Request up to 5 results
+            val addresses = geocoder.getFromLocationName(locationName, 5)
             if (!addresses.isNullOrEmpty()) {
                 val address = addresses[0]
-                address.locality ?: address.getAddressLine(0)
+                Location("geocoder").apply {
+                    latitude = address.latitude
+                    longitude = address.longitude
+                }
             } else {
                 null
             }
