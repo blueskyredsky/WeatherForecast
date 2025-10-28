@@ -1,5 +1,6 @@
 package com.notification
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -17,7 +18,13 @@ import javax.inject.Singleton
 
 private const val MAX_NUM_NOTIFICATIONS = 5
 private const val TARGET_ACTIVITY_NAME = "com.weatherforcast.MainActivity"
+private const val WEATHER_FORECAST_NOTIFICATION_REQUEST_CODE = 0
 private const val WEATHER_FORECAST_NOTIFICATION_CHANNEL_ID = ""
+private const val DEEP_LINK_SCHEME_AND_HOST = "https://www.weatherforecast.sampleapp.com"
+private const val DEEP_LINK_FORECAST_PATH = "forecast"
+private const val DEEP_LINK_BASE_PATH = "$DEEP_LINK_SCHEME_AND_HOST/$DEEP_LINK_FORECAST_PATH"
+const val DEEP_LINK_CITY_KEY = "city"
+const val DEEP_LINK_URI_PATTERN = "$DEEP_LINK_BASE_PATH/{$DEEP_LINK_CITY_KEY}"
 
 @Singleton
 class DefaultNotificationHandler @Inject constructor(
@@ -27,7 +34,7 @@ class DefaultNotificationHandler @Inject constructor(
     private val CHANNEL_ID = "weather_updates_channel"
     private val NOTIFICATION_ID = 101
 
-    override fun showWeatherNotification(title: String, content: String) {
+    override fun postWeatherForecastNotification(title: String, content: String) {
         createNotificationChannel()
 
         // Intent to launch MainActivity, which will handle navigation to the weather screen
@@ -79,6 +86,22 @@ class DefaultNotificationHandler @Inject constructor(
 }
 
 /**
+ * Creates a notification for configured for weather forecast updates
+ */
+private fun Context.createWeatherForecastNotification(
+    block: NotificationCompat.Builder.() -> Unit,
+): Notification {
+    ensureNotificationChannelExists()
+    return NotificationCompat.Builder(
+        this,
+        WEATHER_FORECAST_NOTIFICATION_CHANNEL_ID,
+    )
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .apply(block)
+        .build()
+}
+
+/**
  * Ensures that a notification channel is present if applicable
  */
 private fun Context.ensureNotificationChannelExists() {
@@ -94,3 +117,17 @@ private fun Context.ensureNotificationChannelExists() {
     // Register the channel with the system
     NotificationManagerCompat.from(this).createNotificationChannel(channel)
 }
+
+//private fun Context.newsPendingIntent(): PendingIntent? = PendingIntent.getActivity(
+//    this,
+//    WEATHER_FORECAST_NOTIFICATION_REQUEST_CODE,
+//    Intent().apply {
+//        action = Intent.ACTION_VIEW
+//        data = newsResource.newsDeepLinkUri()
+//        component = ComponentName(
+//            packageName,
+//            TARGET_ACTIVITY_NAME,
+//        )
+//    },
+//    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+//)
