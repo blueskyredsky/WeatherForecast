@@ -38,6 +38,9 @@ android {
 
 dependencies {
 
+    // Projects
+    implementation(projects.core.notification)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
