@@ -5,8 +5,10 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType.Companion.StringType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.forecast.ui.ForecastScreen
+import com.notification.DEEP_LINK_URI_PATTERN
 
 /**
  * The root route for the entire Forecast feature graph.
@@ -33,6 +35,18 @@ fun NavGraphBuilder.addForecastGraph(
             route = ForecastRoutes.ItemForecast.route,
             arguments = listOf(
                 navArgument("locationName") { type = StringType }
+            ),
+            deepLinks = listOf(
+                navDeepLink {
+                    /**
+                     * This destination has a deep link that enables a specific weather forecast to be
+                     * opened from a notification (@see DefaultNotificationHandler for more). The location
+                     * is sent in the URI rather than being modelled in the route type because it's
+                     * transient data (stored in SavedStateHandle) that is cleared after the user has
+                     * opened the weather forecast.
+                     */
+                    uriPattern = DEEP_LINK_URI_PATTERN
+                },
             )
         ) { backStackEntry ->
             val locationName = backStackEntry.arguments?.getString("locationName")

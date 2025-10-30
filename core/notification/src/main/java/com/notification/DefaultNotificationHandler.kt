@@ -18,7 +18,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val MAX_NUM_NOTIFICATIONS = 5
 private const val TARGET_ACTIVITY_NAME = "com.weatherforcast.MainActivity"
 private const val WEATHER_FORECAST_NOTIFICATION_REQUEST_CODE = 0
 private const val WEATHER_FORECAST_NOTIFICATION_ID = 1
@@ -27,8 +26,8 @@ private const val WEATHER_FORECAST_NOTIFICATION_GROUP = "NEWS_NOTIFICATIONS"
 private const val DEEP_LINK_SCHEME_AND_HOST = "https://www.weatherforecast.sampleapp.com"
 private const val DEEP_LINK_FORECAST_PATH = "forecast"
 private const val DEEP_LINK_BASE_PATH = "$DEEP_LINK_SCHEME_AND_HOST/$DEEP_LINK_FORECAST_PATH"
-const val DEEP_LINK_CITY_KEY = "city"
-const val DEEP_LINK_URI_PATTERN = "$DEEP_LINK_BASE_PATH/{$DEEP_LINK_CITY_KEY}"
+const val DEEP_LINK_LOCATION_KEY = "location"
+const val DEEP_LINK_URI_PATTERN = "$DEEP_LINK_BASE_PATH/{$DEEP_LINK_LOCATION_KEY}"
 
 @Singleton
 class DefaultNotificationHandler @Inject constructor(
