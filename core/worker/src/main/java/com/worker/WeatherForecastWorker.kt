@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkerParameters
 import com.datastore.UserPreferenceManager
 import com.network.ApiService
@@ -22,10 +24,6 @@ class WeatherForecastWorker @AssistedInject constructor(
     private val userPreferenceManager: UserPreferenceManager,
     private val notificationHandler: NotificationHandler
 ) : CoroutineWorker(appContext, workerParams) {
-
-    private companion object {
-        private const val TAG = "WeatherForecastWorker"
-    }
 
     override suspend fun doWork(): Result {
         val coordinates = userPreferenceManager.userCoordinatesFlow.firstOrNull()
@@ -59,11 +57,20 @@ class WeatherForecastWorker @AssistedInject constructor(
     }
 
     private fun processCurrentWeather(currentWeatherDTO: CurrentWeatherDTO): Pair<String, String> {
-        // Implement logic to extract summary, e.g., "Max temp 15°C, Min 5°C, Sunny."
         val city = currentWeatherDTO.locationDTO?.name.orEmpty()
         val currentTemperature = "${currentWeatherDTO.currentDTO?.tempC?.roundToInt()?.toString().orEmpty() }°"
         val currentCondition = currentWeatherDTO.currentDTO?.conditionDTO?.text.orEmpty()
 
         return city to "$currentTemperature, $currentCondition"
+    }
+
+    companion object {
+        private const val TAG = "WeatherForecastWorker"
+
+//        fun startUpSyncWork() = OneTimeWorkRequestBuilder<DelegatingWorker>()
+//            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+//            .setConstraints(SyncConstraints)
+//            .setInputData(SyncWorker::class.delegatedData())
+//            .build()
     }
 }
