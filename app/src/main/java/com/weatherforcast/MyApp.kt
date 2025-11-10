@@ -1,7 +1,7 @@
 package com.weatherforcast
 
 import android.app.Application
-import com.worker.initialiser.WeatherForecastWorkInitializer
+import com.worker.initializers.WeatherForecastWorkInitializer
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp

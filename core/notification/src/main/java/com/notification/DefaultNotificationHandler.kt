@@ -45,7 +45,7 @@ class DefaultNotificationHandler @Inject constructor(
             }
 
             val weatherForecastNotification = createWeatherForecastNotification {
-                setSmallIcon(R.drawable.ic_sunny)
+                setSmallIcon(com.common.R.drawable.ic_sunny_small)
                     .setContentTitle(location)
                     .setContentText(weatherForecast)
                     .setContentIntent(weatherForecastPendingIntent(location))

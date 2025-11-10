@@ -40,6 +40,7 @@ dependencies {
     implementation(projects.core.datastore)
     implementation(projects.core.notification)
     implementation(projects.core.network)
+    implementation(projects.core.common)
 
     // Worker
     implementation(libs.work.manager)

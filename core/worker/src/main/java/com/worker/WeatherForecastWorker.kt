@@ -6,14 +6,17 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
 import com.datastore.UserPreferenceManager
 import com.network.ApiService
 import com.network.models.reponse.currentweather.CurrentWeatherDTO
 import com.notification.NotificationHandler
+import com.worker.initializers.WorkerConstraints
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.firstOrNull
+import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 @HiltWorker
@@ -67,10 +70,13 @@ class WeatherForecastWorker @AssistedInject constructor(
     companion object {
         private const val TAG = "WeatherForecastWorker"
 
-//        fun startUpSyncWork() = OneTimeWorkRequestBuilder<DelegatingWorker>()
-//            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-//            .setConstraints(SyncConstraints)
-//            .setInputData(SyncWorker::class.delegatedData())
-//            .build()
+        fun startUpSyncWork() = PeriodicWorkRequestBuilder<DelegatingWorker>(
+            repeatInterval = 1,
+            repeatIntervalTimeUnit = TimeUnit.HOURS
+        )
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setConstraints(WorkerConstraints)
+            .setInputData(WeatherForecastWorker::class.delegatedData())
+            .build()
     }
 }

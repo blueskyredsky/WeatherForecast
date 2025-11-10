@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fetching_weather_information">Fetching weather information</string>
+    <string name="background_tasks_for_weather_forecast">Background tasks for weather forecast</string>
+    <string name="weather_forecast">Weather Forecast</string>
+</resources>
