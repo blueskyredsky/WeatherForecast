@@ -66,7 +66,7 @@ class WeatherForecastWorker @AssistedInject constructor(
         fun startUpWork() = PeriodicWorkRequestBuilder<DelegatingWorker>(
             repeatInterval = 12,
             repeatIntervalTimeUnit = TimeUnit.HOURS
-        ).setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+        )
             .setConstraints(WorkerConstraints)
             .setInputData(WeatherForecastWorker::class.delegatedData()).build()
     }
