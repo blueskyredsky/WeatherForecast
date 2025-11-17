@@ -41,6 +41,7 @@ dependencies {
     implementation(projects.core.notification)
     implementation(projects.core.network)
     implementation(projects.core.common)
+    implementation(projects.core.threading)
 
     // Worker
     implementation(libs.work.manager)
