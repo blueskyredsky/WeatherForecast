@@ -4,12 +4,10 @@ import android.content.Context
 import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.OutOfQuotaPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
 import com.datastore.UserPreferenceManager
 import com.network.ApiService
-import com.network.models.reponse.currentweather.CurrentWeatherDTO
 import com.network.models.reponse.currentweather.toWeatherSummaryPair
 import com.notification.NotificationHandler
 import com.reza.threading.common.IoDispatcher
@@ -20,7 +18,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
-import kotlin.math.roundToInt
 
 @HiltWorker
 class WeatherForecastWorker @AssistedInject constructor(
