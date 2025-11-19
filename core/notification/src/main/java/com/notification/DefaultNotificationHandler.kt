@@ -26,7 +26,7 @@ private const val WEATHER_FORECAST_NOTIFICATION_GROUP = "NEWS_NOTIFICATIONS"
 private const val DEEP_LINK_SCHEME_AND_HOST = "https://www.weatherforecast.sampleapp.com"
 private const val DEEP_LINK_FORECAST_PATH = "forecast"
 private const val DEEP_LINK_BASE_PATH = "$DEEP_LINK_SCHEME_AND_HOST/$DEEP_LINK_FORECAST_PATH"
-const val DEEP_LINK_LOCATION_KEY = "location"
+const val DEEP_LINK_LOCATION_KEY = "locationName"
 const val DEEP_LINK_URI_PATTERN = "$DEEP_LINK_BASE_PATH/{$DEEP_LINK_LOCATION_KEY}"
 
 @Singleton

@@ -46,7 +46,8 @@ dependencies {
     // Worker
     implementation(libs.work.manager)
     implementation(libs.hilt.work)
-    kapt(libs.hilt.compiler)
+
+    kapt(libs.androidx.hilt.compiler)
 
     // DI
     implementation(libs.hilt.android)
