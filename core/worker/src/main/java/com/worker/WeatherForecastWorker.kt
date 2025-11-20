@@ -61,8 +61,8 @@ class WeatherForecastWorker @AssistedInject constructor(
         private const val TAG = "WeatherForecastWorker"
 
         fun startUpWork() = PeriodicWorkRequestBuilder<DelegatingWorker>(
-            repeatInterval = 12,
-            repeatIntervalTimeUnit = TimeUnit.HOURS
+            repeatInterval = 5,
+            repeatIntervalTimeUnit = TimeUnit.MINUTES
         )
             .setConstraints(WorkerConstraints)
             .setInputData(WeatherForecastWorker::class.delegatedData()).build()

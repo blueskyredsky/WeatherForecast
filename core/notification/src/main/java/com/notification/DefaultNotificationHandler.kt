@@ -31,7 +31,7 @@ const val DEEP_LINK_URI_PATTERN = "$DEEP_LINK_BASE_PATH/{$DEEP_LINK_LOCATION_KEY
 
 @Singleton
 class DefaultNotificationHandler @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : NotificationHandler {
 
     override fun postWeatherForecastNotification(location: String, weatherForecast: String) =
@@ -60,6 +60,18 @@ class DefaultNotificationHandler @Inject constructor(
                 weatherForecastNotification
             )
         }
+
+    override fun areNotificationsEnabled(): Boolean {
+        // For Android 13
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return ContextCompat.checkSelfPermission(
+                context,
+                permission.POST_NOTIFICATIONS
+            ) == PERMISSION_GRANTED
+        }
+        // For older versions, check if notifications are blocked at system level
+        return NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
 }
 
 /**
