@@ -3,6 +3,7 @@ package com.currentweather.ui
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -16,7 +17,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -65,9 +68,10 @@ import com.currentweather.data.model.currentweather.CurrentWeather
 import com.currentweather.data.model.forecast.Forecast
 import com.currentweather.ui.component.ConnectedWavyLines
 import com.currentweather.ui.component.CustomSearchBar
-import com.currentweather.ui.component.ErrorItem
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import java.util.Calendar
 import kotlin.math.roundToInt
@@ -95,6 +99,36 @@ fun CurrentWeatherScreen(
             Manifest.permission.ACCESS_FINE_LOCATION
         )
     )
+
+    val notificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Manifest.permission.POST_NOTIFICATIONS
+    } else {
+        "" // a place holder
+    }
+
+    val notificationPermissionState = rememberPermissionState(
+        permission = notificationPermission
+    )
+
+    val hasNotificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        notificationPermissionState.status.isGranted
+    } else {
+        true // Permissions are granted by default on older OS versions
+    }
+
+    val requestNotificationPermission: () -> Unit = {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                notificationPermissionState.status.isGranted -> { /* already granted */ }
+                notificationPermissionState.status.shouldShowRationale -> {
+                    notificationPermissionState.launchPermissionRequest()
+                }
+                else -> {
+                    notificationPermissionState.launchPermissionRequest()
+                }
+            }
+        }
+    }
 
     val appBarColor = colorResource(id = weatherUIData.backgroundColorResource)
 
@@ -282,7 +316,7 @@ fun CurrentWeatherScreen(
 }
 
 @Composable
-fun LoadingContent(modifier: Modifier = Modifier) {
+private fun LoadingContent(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -353,42 +387,15 @@ fun LoadingContent(modifier: Modifier = Modifier) {
     }
 }
 
-fun Modifier.shimmerEffect(): Modifier = composed {
-    val shimmerColors = listOf(
-        Color.LightGray.copy(alpha = 0.6f),
-        Color.LightGray.copy(alpha = 0.2f),
-        Color.LightGray.copy(alpha = 0.6f),
-    )
-
-    val transition = rememberInfiniteTransition(label = "shimmerTransition")
-    val translateAnimation = transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 1000,
-                easing = FastOutSlowInEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        ), label = "shimmerAnimation"
-    )
-
-    background(
-        brush = Brush.linearGradient(
-            colors = shimmerColors,
-            start = Offset(x = translateAnimation.value, y = 0f),
-            end = Offset(x = translateAnimation.value + 500f, y = 500f)
-        )
-    )
-}
-
 @Composable
-fun SuccessContent(
+private fun SuccessContent(
     currentWeather: CurrentWeather?,
     forecast: Forecast?,
     weatherData: WeatherUI,
     modifier: Modifier = Modifier,
-    onNavigateToDetail: (cityName: String) -> Unit
+    hasNotificationPermission: Boolean = false,
+    requestNotificationPermission: () -> Unit = {},
+    onNavigateToDetail: (cityName: String) -> Unit,
 ) {
     val color = colorResource(weatherData.textColorResource)
     Box(
@@ -411,14 +418,18 @@ fun SuccessContent(
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                IconButton(
-                    modifier = Modifier.align(Alignment.End),
-                    onClick = { /*TODO*/ }) {
-                    Icon(
-                        painter = painterResource(com.common.R.drawable.ic_notifications),
-                        contentDescription = null,
-                        tint = colorResource(weatherData.textColorResource)
-                    )
+                if (!hasNotificationPermission) {
+                    IconButton(
+                        modifier = Modifier.align(Alignment.End),
+                        onClick = requestNotificationPermission
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(32.dp),
+                            painter = painterResource(com.common.R.drawable.ic_notifications),
+                            contentDescription = null,
+                            tint = colorResource(weatherData.textColorResource)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(56.dp))
@@ -541,4 +552,57 @@ private fun ItemHourlyForecast(
             color = color
         )
     }
+}
+
+@Composable
+private fun ErrorItem(
+    modifier: Modifier = Modifier,
+    content: @Composable (ColumnScope.() -> Unit) = {},
+    action: () -> Unit,
+    buttonContent: @Composable RowScope.() -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        content()
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = action
+        ) {
+            buttonContent()
+        }
+    }
+}
+
+fun Modifier.shimmerEffect(): Modifier = composed {
+    val shimmerColors = listOf(
+        Color.LightGray.copy(alpha = 0.6f),
+        Color.LightGray.copy(alpha = 0.2f),
+        Color.LightGray.copy(alpha = 0.6f),
+    )
+
+    val transition = rememberInfiniteTransition(label = "shimmerTransition")
+    val translateAnimation = transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 1000,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ), label = "shimmerAnimation"
+    )
+
+    background(
+        brush = Brush.linearGradient(
+            colors = shimmerColors,
+            start = Offset(x = translateAnimation.value, y = 0f),
+            end = Offset(x = translateAnimation.value + 500f, y = 500f)
+        )
+    )
 }

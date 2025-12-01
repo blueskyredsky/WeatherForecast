@@ -61,7 +61,7 @@ class DefaultNotificationHandler @Inject constructor(
             )
         }
 
-    override fun areNotificationsEnabled(): Boolean {
+    override fun isNotificationsEnabled(): Boolean {
         // For Android 13
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             return ContextCompat.checkSelfPermission(

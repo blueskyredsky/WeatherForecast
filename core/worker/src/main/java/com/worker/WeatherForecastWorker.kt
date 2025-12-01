@@ -41,11 +41,16 @@ class WeatherForecastWorker @AssistedInject constructor(
                 val response = apiService.fetchCurrentWeather(location = location)
                 if (response.isSuccessful && response.body() != null) {
                     val (city, weatherSummary) = response.body()!!.toWeatherSummaryPair()
-                    notificationHandler.postWeatherForecastNotification(
-                        location = city,
-                        weatherForecast = weatherSummary
-                    )
-                    Result.success()
+                    if (notificationHandler.isNotificationsEnabled()) {
+                        notificationHandler.postWeatherForecastNotification(
+                            location = city,
+                            weatherForecast = weatherSummary
+                        )
+                        Result.success()
+                    } else {
+                        Log.e(TAG, "Notification is disabled.")
+                        Result.failure()
+                    }
                 } else {
                     Log.e(TAG, "Weather API failed with code: ${response.code()}")
                     Result.retry()
