@@ -13,14 +13,12 @@ import com.currentweather.data.model.forecast.Forecast
 import com.currentweather.data.repository.LocationRepository
 import com.currentweather.data.repository.SearchLocationRepository
 import com.currentweather.data.repository.WeatherRepository
-import com.currentweather.ui.component.ErrorItem
 import com.datastore.UserPreferenceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
@@ -31,7 +29,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.getOrThrow
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
