@@ -47,6 +47,7 @@ dependencies {
     implementation(projects.feature.currentweather)
     implementation(projects.feature.forecast)
     implementation(projects.core.worker)
+    implementation(projects.core.notification)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
